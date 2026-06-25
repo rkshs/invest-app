@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+
+Use feature-based architecture.
+
+Structure:
+src/
+  app/
+  features/
+  entities/
+  shared/
+
+Business logic should not be placed in UI components.
+Prefer composition over inheritance.

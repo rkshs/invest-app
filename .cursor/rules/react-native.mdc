@@ -1,0 +1,15 @@
+---
+alwaysApply: true
+---
+
+Use:
+- Expo
+- TypeScript
+- Functional components
+- Named exports
+- React hooks
+
+Avoid:
+- class components
+- any
+- inline styles

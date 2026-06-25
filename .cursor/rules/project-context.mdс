@@ -1,0 +1,44 @@
+---
+alwaysApply: true
+---
+
+# Project
+
+Investment mobile application.
+
+Roadmap:
+1. Customer demo
+2. MVP
+3. Limited beta testing
+4. Production release
+
+Primary goal:
+Fast iteration and feature delivery while keeping production readiness.
+
+# Stack
+
+- Expo
+- React Native
+- TypeScript
+- Zustand
+- TanStack Query
+- React Navigation
+
+# Design
+
+- Minimalistic banking style
+- White background
+- Purple accent color
+- Rounded cards
+- Large typography
+- Spacious layout
+- Card-based UI
+- Main language is Russian
+- Design reference based on @design/ref1.png and @design/ref2.png
+
+# Development principles
+
+- Prefer reusable components.
+- Keep business logic outside UI components.
+- Avoid premature abstractions.
+- Optimize for development speed during MVP phase.
