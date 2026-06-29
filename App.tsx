@@ -7,7 +7,7 @@ export default function App() {
   return (
     <AppProviders>
       <AppNavigation />
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </AppProviders>
   );
 }

@@ -26,15 +26,12 @@ Fast iteration and feature delivery while keeping production readiness.
 
 # Design
 
-- Minimalistic banking style
-- White background
-- Purple accent color
-- Rounded cards
-- Large typography
-- Spacious layout
-- Card-based UI
+- Dark banking style (ref6)
+- Background `#0B1017`, surfaces `#121820`–`#1A2330`
+- Blue accent `#5BA4F5` for primary actions
+- Purple accent `#A894FF` for secondary highlights
+- Rounded cards, large typography, spacious layout
 - Main language is Russian
-- Design reference based on @design/ref1.png and @design/ref2.png
 
 # Development principles
 

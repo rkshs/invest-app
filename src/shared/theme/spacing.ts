@@ -14,6 +14,5 @@ export const radius = {
 } as const;
 
 export const layout = {
-  accountCardHeight: 180,
-  actualNewsCardHeight: 148,
+  accountCardHeight: 148,
 } as const;

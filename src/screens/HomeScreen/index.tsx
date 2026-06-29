@@ -1,13 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { RootStackParamList } from '../../app/navigation';
 import { AccountsCarousel } from '../../components/AccountsCarousel';
-import { ActualNewsSection } from '../../components/ActualNewsSection';
 import { AssetList } from '../../components/AssetList';
-import { CategoryTabs } from '../../components/CategoryTabs';
 import {
   BOTTOM_SCROLL_FADE_HEIGHT,
 } from '../../components/BottomScrollFade';
@@ -16,26 +14,20 @@ import {
   useHomeBottomBarHeight,
 } from '../../components/HomeBottomBar';
 import { HomeHeader } from '../../components/HomeHeader';
+import { getPortfolioTotal } from '../../shared/lib/mapPortfolioRow';
 import { colors, spacing } from '../../shared/theme';
-import { mockActualNews } from './data/mockActualNews';
 import { mockAccounts } from './data/mockAccounts';
-import { getSecuritiesForTab, mockSecurities } from './data/mockSecurities';
-import { portfolioTabs, PortfolioTabId } from './data/portfolioTabs';
+import { mockCashPositions } from './data/mockCashPositions';
+import { mockSecurities } from './data/mockSecurities';
 
 type HomeNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export function HomeScreen() {
   const navigation = useNavigation<HomeNavigationProp>();
   const bottomBarHeight = useHomeBottomBarHeight();
-  const [selectedTab, setSelectedTab] = useState<PortfolioTabId>('actual');
-  const [dismissedNewsIds, setDismissedNewsIds] = useState<string[]>([]);
-  const securities = useMemo(
-    () => getSecuritiesForTab(mockSecurities, selectedTab),
-    [selectedTab],
-  );
-  const actualNews = useMemo(
-    () => mockActualNews.filter((item) => !dismissedNewsIds.includes(item.id)),
-    [dismissedNewsIds],
+  const portfolioTotalValue = useMemo(
+    () => getPortfolioTotal(mockSecurities, mockCashPositions),
+    [],
   );
 
   return (
@@ -60,18 +52,11 @@ export function HomeScreen() {
               navigation.navigate('Account', { accountId: account.id })
             }
           />
-          <ActualNewsSection
-            items={actualNews}
-            onDismiss={(id) =>
-              setDismissedNewsIds((current) => [...current, id])
-            }
+          <AssetList
+            securities={mockSecurities}
+            cashPositions={mockCashPositions}
+            portfolioTotalValue={portfolioTotalValue}
           />
-          <CategoryTabs
-            tabs={portfolioTabs}
-            selectedId={selectedTab}
-            onSelect={(id) => setSelectedTab(id as PortfolioTabId)}
-          />
-          <AssetList securities={securities} />
         </ScrollView>
 
         <HomeBottomBar

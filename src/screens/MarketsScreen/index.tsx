@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { colors, spacing, typography } from '../../shared/theme';
+
 export function MarketsScreen() {
   return (
     <View style={styles.container}>
@@ -11,11 +13,12 @@ export function MarketsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: colors.background,
+    padding: spacing.md,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.lg,
+    color: colors.text,
   },
 });

@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AccountScreen } from '../../screens/AccountScreen';
@@ -6,6 +6,19 @@ import { ChatDetailScreen } from '../../screens/ChatDetailScreen';
 import { ChatScreen } from '../../screens/ChatScreen';
 import { HomeScreen } from '../../screens/HomeScreen';
 import { MarketsScreen } from '../../screens/MarketsScreen';
+import { colors } from '../../shared/theme';
+
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: colors.background,
+    card: colors.surfaceElevated,
+    text: colors.text,
+    border: colors.border,
+    primary: colors.blue,
+  },
+};
 
 export type RootStackParamList = {
   Home: undefined;
@@ -19,7 +32,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigation() {
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Home"

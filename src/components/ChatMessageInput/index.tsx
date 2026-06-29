@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     width: SEND_BUTTON_SIZE,
     height: SEND_BUTTON_SIZE,
     borderRadius: radius.full,
-    backgroundColor: colors.purple,
+    backgroundColor: colors.blue,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,

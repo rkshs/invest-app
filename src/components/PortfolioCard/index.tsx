@@ -4,12 +4,7 @@ import {
   formatAccountDynamics,
   formatMoney,
 } from '../../shared/lib/formatFinance';
-import {
-  generateSparklinePoints,
-  getSparklineTrend,
-} from '../../shared/lib/generateSparkline';
 import { colors, radius, shadows, spacing, typography, layout } from '../../shared/theme';
-import { Sparkline } from '../Sparkline';
 
 type PortfolioCardProps = {
   accountNumber: string;
@@ -32,8 +27,6 @@ export function PortfolioCard({
   width,
   onPress,
 }: PortfolioCardProps) {
-  const trend = getSparklineTrend(changeFromZero);
-  const sparklinePoints = generateSparklinePoints(accountNumber, trend);
   const accountType = getAccountTypeLabel(accountNumber);
   const isPositive = changeFromZero > 0;
   const isNegative = changeFromZero < 0;
@@ -51,40 +44,32 @@ export function PortfolioCard({
         onPress && pressed && styles.pressed,
       ]}
     >
-      <View style={styles.content}>
-        <View style={styles.main}>
-          <View style={styles.header}>
-            <View style={styles.accountBadge}>
-              <Text style={styles.accountBadgeText}>{accountType}</Text>
-            </View>
-            <Text style={styles.accountNumber}>{accountNumber}</Text>
-          </View>
-
-          <Text style={styles.balance}>{formatMoney(balance)}</Text>
-
-          <View
-            style={[
-              styles.dynamicsPill,
-              isPositive && styles.dynamicsPillPositive,
-              isNegative && styles.dynamicsPillNegative,
-              !isPositive && !isNegative && styles.dynamicsPillNeutral,
-            ]}
-          >
-            <Text
-              style={[
-                styles.dynamicsText,
-                isPositive && styles.dynamicsTextPositive,
-                isNegative && styles.dynamicsTextNegative,
-              ]}
-            >
-              {formatAccountDynamics(changeFromZero, changePercentFromZero)}
-            </Text>
-          </View>
+      <View style={styles.header}>
+        <View style={styles.accountBadge}>
+          <Text style={styles.accountBadgeText}>{accountType}</Text>
         </View>
+        <Text style={styles.accountNumber}>{accountNumber}</Text>
+      </View>
 
-        <View style={styles.chart}>
-          <Sparkline points={sparklinePoints} trend={trend} />
-        </View>
+      <Text style={styles.balance}>{formatMoney(balance)}</Text>
+
+      <View
+        style={[
+          styles.dynamicsPill,
+          isPositive && styles.dynamicsPillPositive,
+          isNegative && styles.dynamicsPillNegative,
+          !isPositive && !isNegative && styles.dynamicsPillNeutral,
+        ]}
+      >
+        <Text
+          style={[
+            styles.dynamicsText,
+            isPositive && styles.dynamicsTextPositive,
+            isNegative && styles.dynamicsTextNegative,
+          ]}
+        >
+          {formatAccountDynamics(changeFromZero, changePercentFromZero)}
+        </Text>
       </View>
     </Pressable>
   );
@@ -96,24 +81,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.lg,
     height: layout.accountCardHeight,
-    overflow: 'hidden',
-  },
-  content: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'stretch',
-  },
-  main: {
-    flex: 1,
     justifyContent: 'space-between',
-    paddingRight: spacing.sm,
+    overflow: 'hidden',
   },
   header: {
     gap: spacing.sm,
   },
   accountBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: colors.purpleLight,
+    backgroundColor: colors.blueLight,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -121,7 +97,7 @@ const styles = StyleSheet.create({
   accountBadgeText: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: 12,
-    color: colors.purple,
+    color: colors.blue,
     letterSpacing: 0.4,
   },
   accountNumber: {
@@ -133,14 +109,12 @@ const styles = StyleSheet.create({
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.xl,
     color: colors.text,
-    marginTop: spacing.md,
   },
   dynamicsPill: {
     alignSelf: 'flex-start',
     borderRadius: radius.full,
     paddingHorizontal: spacing.sm + 2,
     paddingVertical: spacing.xs + 2,
-    marginTop: spacing.sm,
   },
   dynamicsPillPositive: {
     backgroundColor: colors.greenLight,
@@ -161,10 +135,6 @@ const styles = StyleSheet.create({
   },
   dynamicsTextNegative: {
     color: colors.red,
-  },
-  chart: {
-    justifyContent: 'center',
-    alignItems: 'flex-end',
   },
   pressed: {
     opacity: 0.92,

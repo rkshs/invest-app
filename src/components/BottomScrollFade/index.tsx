@@ -6,12 +6,14 @@ import { colors } from '../../shared/theme';
 
 export const BOTTOM_SCROLL_FADE_HEIGHT = 48;
 
+const fadeStartColor = 'rgba(11, 16, 23, 0)';
+
 export function BottomScrollFadeContent() {
   return (
     <View style={styles.fade}>
-      <BlurView intensity={Platform.OS === 'web' ? 12 : 24} tint="light" style={styles.blur} />
+      <BlurView intensity={Platform.OS === 'web' ? 12 : 24} tint="dark" style={styles.blur} />
       <LinearGradient
-        colors={['rgba(250, 250, 252, 0)', colors.background]}
+        colors={[fadeStartColor, colors.background]}
         style={styles.gradient}
       />
     </View>

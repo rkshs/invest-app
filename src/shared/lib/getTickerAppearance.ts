@@ -1,16 +1,10 @@
 import { colors } from '../theme/colors';
 
-const TICKER_COLORS = [
-  colors.purpleLight,
-  colors.peach,
-  colors.greenLight,
-  colors.redLight,
-  'rgba(108, 81, 255, 0.2)',
-] as const;
+const TICKER_BACKGROUND = colors.surfaceSoft;
 
 const TICKER_TEXT_COLORS = [
-  colors.purple,
-  colors.text,
+  colors.blue,
+  colors.blue,
   colors.green,
   colors.red,
   colors.purple,
@@ -28,10 +22,10 @@ export function getTickerAppearance(ticker: string): {
     hash |= 0;
   }
 
-  const paletteIndex = Math.abs(hash) % TICKER_COLORS.length;
+  const paletteIndex = Math.abs(hash) % TICKER_TEXT_COLORS.length;
 
   return {
-    backgroundColor: TICKER_COLORS[paletteIndex],
+    backgroundColor: TICKER_BACKGROUND,
     color: TICKER_TEXT_COLORS[paletteIndex],
     label: ticker.slice(0, 2),
   };

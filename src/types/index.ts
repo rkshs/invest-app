@@ -1,6 +1,10 @@
+import type { SecurityInstrumentType } from './accountPosition';
+
 export type { Chat } from './chat';
 export type { ChatMessage } from './chatMessage';
-export type PortfolioTabId = 'favorites' | 'actual' | 'growth-decline' | 'momentum';
+export type { SecurityInstrumentType } from './accountPosition';
+export type { PortfolioRowData, PortfolioRowKind } from './portfolioRow';
+export type { CashPosition, PortfolioCurrencyCode } from './portfolioCash';
 
 export type Asset = {
   id: string;
@@ -25,5 +29,8 @@ export type Account = {
 };
 
 export type Security = Asset & {
-  tabIds: PortfolioTabId[];
+  isin: string;
+  securityType: SecurityInstrumentType;
+  quantity: number;
+  currencyCode?: string;
 };
