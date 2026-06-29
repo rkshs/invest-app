@@ -1,87 +1,88 @@
-import { PortfolioTabId, Security } from '../../../types';
+import { Security } from '../../../types';
 
 export const mockSecurities: Security[] = [
   {
     id: '1',
     name: 'Сбербанк',
     ticker: 'SBER',
+    isin: 'RU0009029540',
+    securityType: 'stock',
+    quantity: 100,
     price: 28540,
     changePercent: 1.24,
-    tabIds: ['favorites', 'actual', 'momentum'],
   },
   {
     id: '2',
     name: 'Газпром',
     ticker: 'GAZP',
-    price: 12890,
+    isin: 'RU0007661625',
+    securityType: 'stock',
+    quantity: 500,
+    price: 64450,
     changePercent: -0.82,
-    tabIds: ['actual', 'growth-decline'],
   },
   {
     id: '3',
     name: 'Лукойл',
     ticker: 'LKOH',
-    price: 7120,
+    isin: 'RU0009024277',
+    securityType: 'stock',
+    quantity: 2,
+    price: 8560,
     changePercent: 2.15,
-    tabIds: ['favorites', 'growth-decline', 'momentum'],
   },
   {
     id: '4',
     name: 'Яндекс',
     ticker: 'YDEX',
-    price: 3980,
+    isin: 'RU000A107T19',
+    securityType: 'stock',
+    quantity: 15,
+    price: 59700,
     changePercent: 3.42,
-    tabIds: ['favorites', 'actual', 'momentum'],
   },
   {
     id: '5',
     name: 'Норникель',
     ticker: 'GMKN',
-    price: 15420,
+    isin: 'RU0007288411',
+    securityType: 'stock',
+    quantity: 10,
+    price: 154200,
     changePercent: -1.67,
-    tabIds: ['actual', 'growth-decline'],
   },
   {
     id: '6',
     name: 'Татнефть',
     ticker: 'TATN',
-    price: 6210,
+    isin: 'RU0006938994',
+    securityType: 'stock',
+    quantity: 40,
+    price: 24840,
     changePercent: 0.95,
-    tabIds: ['actual', 'growth-decline'],
   },
   {
     id: '7',
     name: 'МТС',
     ticker: 'MTSS',
-    price: 2145,
+    isin: 'RU0007775219',
+    securityType: 'stock',
+    quantity: 120,
+    price: 25740,
     changePercent: -0.34,
-    tabIds: ['growth-decline'],
   },
   {
     id: '8',
     name: 'ВТБ',
     ticker: 'VTBR',
-    price: 9850,
+    isin: 'RU000A0JP5V6',
+    securityType: 'stock',
+    quantity: 200,
+    price: 19700,
     changePercent: 4.18,
-    tabIds: ['momentum', 'growth-decline'],
   },
 ];
 
-export function getSecuritiesForTab(
-  securities: Security[],
-  tabId: PortfolioTabId,
-): Security[] {
-  if (tabId === 'momentum') {
-    return [...securities]
-      .sort((left, right) => Math.abs(right.changePercent) - Math.abs(left.changePercent))
-      .slice(0, 5);
-  }
-
-  if (tabId === 'growth-decline') {
-    return [...securities]
-      .filter((security) => security.changePercent !== 0)
-      .sort((left, right) => right.changePercent - left.changePercent);
-  }
-
-  return securities.filter((security) => security.tabIds.includes(tabId));
+export function getSecuritiesPortfolioTotal(securities: Security[] = mockSecurities): number {
+  return securities.reduce((total, security) => total + security.price, 0);
 }

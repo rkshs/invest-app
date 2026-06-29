@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: radius.full,
     paddingHorizontal: spacing.xs + 2,
-    backgroundColor: colors.purple,
+    backgroundColor: colors.blue,
     alignItems: 'center',
     justifyContent: 'center',
   },

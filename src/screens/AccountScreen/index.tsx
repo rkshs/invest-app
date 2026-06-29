@@ -4,7 +4,6 @@ import { useLayoutEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { RootStackParamList } from '../../app/navigation';
-import { AccountCurrenciesSection } from '../../components/AccountCurrenciesSection';
 import { AccountStocksSection } from '../../components/AccountStocksSection';
 import { PortfolioCard } from '../../components/PortfolioCard';
 import { colors, spacing, typography } from '../../shared/theme';
@@ -69,12 +68,12 @@ export function AccountScreen() {
         />
       </View>
 
-      <AccountCurrenciesSection currencies={currencies} />
-
       <AccountStocksSection
         positions={positions}
+        currencies={currencies}
         totalValue={positionsSummary.totalValue}
         totalChange={positionsSummary.totalChange}
+        portfolioTotalValue={account.balance}
       />
     </ScrollView>
   );

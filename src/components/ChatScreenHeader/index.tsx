@@ -46,7 +46,7 @@ export function ChatScreenHeader({
         style={({ pressed }) => [styles.profileButton, pressed && styles.pressed]}
       >
         <View style={styles.avatar}>
-          <Ionicons name="person" size={20} color={colors.purple} />
+          <Ionicons name="person" size={20} color={colors.blue} />
         </View>
       </Pressable>
     </View>
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     height: ICON_BUTTON_SIZE,
     borderRadius: radius.full,
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.border,
     shadowColor: colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,

@@ -61,6 +61,53 @@ export function formatPositionQuantity(quantity: number, unitPrice: number): str
   return `${quantity} шт × ${formatMoney(unitPrice)}`;
 }
 
+export function formatPortfolioPositionMeta(
+  quantity: number,
+  portfolioShare: number,
+  currency = 'RUB',
+): string {
+  const share = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(portfolioShare);
+
+  return `${quantity} шт · ${share}% · ${currency}`;
+}
+
+export function formatCashPositionMeta(
+  portfolioShare: number,
+  currency = 'RUB',
+): string {
+  const share = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(portfolioShare);
+
+  return `Деньги · ${share}% · ${currency}`;
+}
+
+export function formatPortfolioMoney(
+  amount: number,
+  currency = 'RUB',
+): string {
+  const formatted = new Intl.NumberFormat('ru-RU', {
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+  return `${formatted} ${currency}`;
+}
+
+export function getPositionPortfolioShare(
+  positionValue: number,
+  portfolioTotalValue: number,
+): number {
+  if (portfolioTotalValue <= 0) {
+    return 0;
+  }
+
+  return (positionValue / portfolioTotalValue) * 100;
+}
+
 export function formatPositionDynamics(
   changeAmount: number,
   changePercent: number,

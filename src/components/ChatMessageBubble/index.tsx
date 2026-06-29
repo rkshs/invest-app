@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: spacing.xs,
   },
   bubbleOwn: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.blue,
     borderTopRightRadius: spacing.xs,
   },
   text: {

@@ -1,18 +1,46 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import {
+  mapCashToPortfolioRow,
+  mapSecurityToPortfolioRow,
+} from '../../shared/lib/mapPortfolioRow';
 import { spacing } from '../../shared/theme';
+import { CashPosition } from '../../types/portfolioCash';
 import { Security } from '../../types';
-import { AssetRow } from '../AssetRow';
+import { PortfolioPositionRow } from '../PortfolioPositionRow';
 
 type AssetListProps = {
   securities: Security[];
+  cashPositions: CashPosition[];
+  portfolioTotalValue: number;
 };
 
-export function AssetList({ securities }: AssetListProps) {
+export function AssetList({
+  securities,
+  cashPositions,
+  portfolioTotalValue,
+}: AssetListProps) {
+  const rows = useMemo(
+    () => [
+      ...securities.map((security) =>
+        mapSecurityToPortfolioRow(security, portfolioTotalValue),
+      ),
+      ...cashPositions.map((cash) =>
+        mapCashToPortfolioRow(cash, portfolioTotalValue),
+      ),
+    ],
+    [cashPositions, portfolioTotalValue, securities],
+  );
+
   return (
     <View style={styles.list}>
-      {securities.map((security) => (
-        <AssetRow key={security.id} security={security} />
+      {rows.map((item, index) => (
+        <PortfolioPositionRow
+          key={item.id}
+          item={item}
+          isLast={index === rows.length - 1}
+        />
       ))}
     </View>
   );
@@ -20,8 +48,7 @@ export function AssetList({ securities }: AssetListProps) {
 
 const styles = StyleSheet.create({
   list: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
-    gap: spacing.sm,
   },
 });
