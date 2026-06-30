@@ -1,140 +1,92 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import {
-  formatAccountDynamics,
-  formatMoney,
+  formatPortfolioDataTimestamp,
+  formatPortfolioMoney,
 } from '../../shared/lib/formatFinance';
-import { colors, radius, shadows, spacing, typography, layout } from '../../shared/theme';
+import { colors, radius, spacing, typography } from '../../shared/theme';
 
 type PortfolioCardProps = {
-  accountNumber: string;
+  cpid: string;
   balance: number;
-  changeFromZero: number;
-  changePercentFromZero: number;
+  currencyCode?: string;
+  dataAsOf?: string;
   width?: number;
   onPress?: () => void;
 };
 
-function getAccountTypeLabel(accountNumber: string): string {
-  return accountNumber.split(' ')[0] ?? accountNumber;
-}
-
 export function PortfolioCard({
-  accountNumber,
+  cpid,
   balance,
-  changeFromZero,
-  changePercentFromZero,
+  currencyCode = 'RUB',
+  dataAsOf = '11:20',
   width,
   onPress,
 }: PortfolioCardProps) {
-  const accountType = getAccountTypeLabel(accountNumber);
-  const isPositive = changeFromZero > 0;
-  const isNegative = changeFromZero < 0;
-
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={onPress ? `Счёт ${accountNumber}` : undefined}
+      accessibilityLabel={onPress ? `Портфель CPID ${cpid}` : undefined}
       disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [
-        styles.card,
-        shadows.card,
+        styles.wrapper,
         width !== undefined && { width },
         onPress && pressed && styles.pressed,
       ]}
     >
-      <View style={styles.header}>
-        <View style={styles.accountBadge}>
-          <Text style={styles.accountBadgeText}>{accountType}</Text>
-        </View>
-        <Text style={styles.accountNumber}>{accountNumber}</Text>
-      </View>
-
-      <Text style={styles.balance}>{formatMoney(balance)}</Text>
-
-      <View
-        style={[
-          styles.dynamicsPill,
-          isPositive && styles.dynamicsPillPositive,
-          isNegative && styles.dynamicsPillNegative,
-          !isPositive && !isNegative && styles.dynamicsPillNeutral,
+      <LinearGradient
+        colors={[
+          colors.portfolioCardGradient.start,
+          colors.portfolioCardGradient.middle,
+          colors.portfolioCardGradient.end,
         ]}
+        locations={[0, 0.42, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.15, y: 1 }}
+        style={styles.card}
       >
-        <Text
-          style={[
-            styles.dynamicsText,
-            isPositive && styles.dynamicsTextPositive,
-            isNegative && styles.dynamicsTextNegative,
-          ]}
-        >
-          {formatAccountDynamics(changeFromZero, changePercentFromZero)}
+        <Text style={styles.subtitle}>Портфель · CPID {cpid}</Text>
+        <Text style={styles.balance}>
+          {formatPortfolioMoney(balance, currencyCode)}
         </Text>
-      </View>
+        <Text style={styles.timestamp}>
+          {formatPortfolioDataTimestamp(dataAsOf)}
+        </Text>
+      </LinearGradient>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surfaceElevated,
+  wrapper: {
     borderRadius: radius.lg,
-    padding: spacing.lg,
-    height: layout.accountCardHeight,
-    justifyContent: 'space-between',
     overflow: 'hidden',
   },
-  header: {
+  card: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg + spacing.xs,
     gap: spacing.sm,
   },
-  accountBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.blueLight,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  accountBadgeText: {
-    fontFamily: typography.fontFamily.semiBold,
-    fontSize: 12,
-    color: colors.blue,
-    letterSpacing: 0.4,
-  },
-  accountNumber: {
+  subtitle: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.sm,
+    lineHeight: 20,
     color: colors.textSecondary,
   },
   balance: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.xl,
+    lineHeight: 40,
     color: colors.text,
   },
-  dynamicsPill: {
-    alignSelf: 'flex-start',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm + 2,
-    paddingVertical: spacing.xs + 2,
-  },
-  dynamicsPillPositive: {
-    backgroundColor: colors.greenLight,
-  },
-  dynamicsPillNegative: {
-    backgroundColor: colors.redLight,
-  },
-  dynamicsPillNeutral: {
-    backgroundColor: colors.surface,
-  },
-  dynamicsText: {
-    fontFamily: typography.fontFamily.medium,
+  timestamp: {
+    fontFamily: typography.fontFamily.regular,
     fontSize: 12,
+    lineHeight: 16,
     color: colors.textSecondary,
-  },
-  dynamicsTextPositive: {
-    color: colors.green,
-  },
-  dynamicsTextNegative: {
-    color: colors.red,
+    marginTop: spacing.xs,
   },
   pressed: {
     opacity: 0.92,

@@ -22,10 +22,13 @@ export type Portfolio = {
 
 export type Account = {
   id: string;
-  number: string;
+  cpid: string;
+  ownerName: string;
   balance: number;
   changeFromZero: number;
   changePercentFromZero: number;
+  currencyCode?: 'RUB' | 'USD' | 'EUR';
+  dataAsOf?: string;
 };
 
 export type Security = Asset & {

@@ -25,6 +25,12 @@ export const colors = {
   surfaceElevated: '#1A2330',
   border: 'rgba(255, 255, 255, 0.08)',
   borderSubtle: 'rgba(255, 255, 255, 0.05)',
+
+  portfolioCardGradient: {
+    start: '#243148',
+    middle: '#1A2535',
+    end: '#121820',
+  },
 } as const;
 
 export const shadows = {

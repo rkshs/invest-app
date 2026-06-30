@@ -4,20 +4,20 @@ export const mockCashPositions: CashPosition[] = [
   {
     id: 'cash-rub',
     currencyCode: 'RUB',
-    balance: 125000,
-    portfolioValue: 125000,
+    balance: 98000,
+    portfolioValue: 98000,
   },
   {
     id: 'cash-usd',
     currencyCode: 'USD',
-    balance: 8500,
-    portfolioValue: 782000,
+    balance: 4200,
+    portfolioValue: 385000,
   },
   {
     id: 'cash-eur',
     currencyCode: 'EUR',
-    balance: 3200,
-    portfolioValue: 345600,
+    balance: 1500,
+    portfolioValue: 162000,
   },
 ];
 

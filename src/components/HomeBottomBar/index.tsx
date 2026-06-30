@@ -8,7 +8,7 @@ import {
 } from '../BottomScrollFade';
 
 type HomeBottomBarProps = {
-  onMarketsPress?: () => void;
+  unreadCount?: number;
   onChatPress?: () => void;
 };
 
@@ -27,8 +27,20 @@ export function useHomeBottomBarHeight(): number {
   return getHomeBottomBarHeight(insets.bottom);
 }
 
-export function HomeBottomBar({ onMarketsPress, onChatPress }: HomeBottomBarProps) {
+function formatUnreadCount(count: number): string {
+  if (count > 99) {
+    return '99+';
+  }
+
+  return String(count);
+}
+
+export function HomeBottomBar({ unreadCount = 0, onChatPress }: HomeBottomBarProps) {
   const insets = useSafeAreaInsets();
+  const hasUnread = unreadCount > 0;
+  const unreadLabel = hasUnread
+    ? `, ${unreadCount} непрочитанных сообщений`
+    : '';
 
   return (
     <View style={styles.wrapper}>
@@ -44,20 +56,19 @@ export function HomeBottomBar({ onMarketsPress, onChatPress }: HomeBottomBarProp
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Рынки"
-          onPress={onMarketsPress}
-          style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-        >
-          <Text style={styles.buttonText}>Рынки</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Чат"
+          accessibilityLabel={`Чат${unreadLabel}`}
           onPress={onChatPress}
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}
         >
           <Text style={styles.buttonText}>Чат</Text>
+
+          {hasUnread ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {formatUnreadCount(unreadCount)}
+              </Text>
+            </View>
+          ) : null}
         </Pressable>
       </View>
     </View>
@@ -80,14 +91,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   actions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
     backgroundColor: colors.background,
   },
   button: {
-    flex: 1,
     backgroundColor: colors.blue,
     borderRadius: radius.md,
     paddingVertical: BUTTON_PADDING_Y,
@@ -97,6 +105,26 @@ const styles = StyleSheet.create({
   buttonText: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.sm + 1,
+    color: colors.white,
+  },
+  badge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 25,
+    height: 25,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.xs + 2,
+    backgroundColor: colors.purple,
+    borderWidth: 2,
+    borderColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: 12,
+    lineHeight: 14,
     color: colors.white,
   },
   pressed: {

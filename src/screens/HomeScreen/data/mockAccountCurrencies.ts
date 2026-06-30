@@ -6,13 +6,13 @@ const accountCurrencies: Record<string, AccountCurrency[]> = {
       id: 'rub',
       name: 'Российский рубль',
       code: 'RUB',
-      balance: 18761.1,
+      balance: 15200,
     },
     {
       id: 'cny',
       name: 'Китайский юань',
       code: 'CNY',
-      balance: 2028.87,
+      balance: 1800.5,
     },
   ],
   '2': [
@@ -20,13 +20,13 @@ const accountCurrencies: Record<string, AccountCurrency[]> = {
       id: 'rub',
       name: 'Российский рубль',
       code: 'RUB',
-      balance: 42150.55,
+      balance: 38500,
     },
     {
       id: 'usd',
       name: 'Доллар США',
       code: 'USD',
-      balance: 1250.4,
+      balance: 980,
     },
   ],
   '3': [
@@ -34,7 +34,7 @@ const accountCurrencies: Record<string, AccountCurrency[]> = {
       id: 'rub',
       name: 'Российский рубль',
       code: 'RUB',
-      balance: 9340.25,
+      balance: 7200,
     },
   ],
 };

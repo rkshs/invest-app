@@ -8,6 +8,7 @@ import { AccountStocksSection } from '../../components/AccountStocksSection';
 import { PortfolioCard } from '../../components/PortfolioCard';
 import { colors, spacing, typography } from '../../shared/theme';
 import { getCurrenciesForAccount } from '../HomeScreen/data/mockAccountCurrencies';
+import { formatAccountTitle } from '../../shared/lib/formatAccount';
 import { getAccountById } from '../HomeScreen/data/mockAccounts';
 import {
   getPositionsForAccount,
@@ -36,14 +37,14 @@ export function AccountScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: account?.number ?? 'Счёт',
+      title: account ? formatAccountTitle(account) : 'Счёт',
       headerShadowVisible: false,
       headerStyle: {
         backgroundColor: colors.background,
       },
       headerBackground: () => <View style={styles.headerBackground} />,
     });
-  }, [account?.number, navigation]);
+  }, [account, navigation]);
 
   if (!account) {
     return (
@@ -61,10 +62,10 @@ export function AccountScreen() {
     >
       <View style={styles.summary}>
         <PortfolioCard
-          accountNumber={account.number}
+          cpid={account.cpid}
           balance={account.balance}
-          changeFromZero={account.changeFromZero}
-          changePercentFromZero={account.changePercentFromZero}
+          currencyCode={account.currencyCode}
+          dataAsOf={account.dataAsOf}
         />
       </View>
 
