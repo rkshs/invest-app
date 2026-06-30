@@ -97,6 +97,10 @@ export function formatPortfolioMoney(
   return `${formatted} ${currency}`;
 }
 
+export function formatPortfolioDataTimestamp(time: string): string {
+  return `Данные на сегодня, ${time}`;
+}
+
 export function getPositionPortfolioShare(
   positionValue: number,
   portfolioTotalValue: number,

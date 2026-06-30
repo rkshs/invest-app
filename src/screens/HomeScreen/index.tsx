@@ -1,10 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { RootStackParamList } from '../../app/navigation';
-import { AccountsCarousel } from '../../components/AccountsCarousel';
 import { AssetList } from '../../components/AssetList';
 import {
   BOTTOM_SCROLL_FADE_HEIGHT,
@@ -14,21 +13,54 @@ import {
   useHomeBottomBarHeight,
 } from '../../components/HomeBottomBar';
 import { HomeHeader } from '../../components/HomeHeader';
+import { PortfolioCard } from '../../components/PortfolioCard';
 import { getPortfolioTotal } from '../../shared/lib/mapPortfolioRow';
 import { colors, spacing } from '../../shared/theme';
+import { PortfolioCurrencyCode } from '../../types/portfolioCash';
+import { getCurrenciesForAccount } from './data/mockAccountCurrencies';
 import { mockAccounts } from './data/mockAccounts';
-import { mockCashPositions } from './data/mockCashPositions';
-import { mockSecurities } from './data/mockSecurities';
+import { getSecuritiesForAccount } from './data/mockAccountSecurities';
+import { getTotalUnreadCount } from '../ChatScreen/data/mockChats';
 
 type HomeNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export function HomeScreen() {
   const navigation = useNavigation<HomeNavigationProp>();
   const bottomBarHeight = useHomeBottomBarHeight();
-  const portfolioTotalValue = useMemo(
-    () => getPortfolioTotal(mockSecurities, mockCashPositions),
-    [],
+  const [selectedAccountId, setSelectedAccountId] = useState(mockAccounts[0]?.id ?? '1');
+
+  const selectedAccount = useMemo(
+    () => mockAccounts.find((account) => account.id === selectedAccountId) ?? mockAccounts[0],
+    [selectedAccountId],
   );
+
+  const securities = useMemo(
+    () => (selectedAccount ? getSecuritiesForAccount(selectedAccount.id) : []),
+    [selectedAccount],
+  );
+
+  const cashPositions = useMemo(
+    () =>
+      selectedAccount
+        ? getCurrenciesForAccount(selectedAccount.id).map((currency) => ({
+            id: `cash-${currency.id}`,
+            currencyCode: currency.code as PortfolioCurrencyCode,
+            balance: currency.balance,
+            portfolioValue: currency.balance,
+          }))
+        : [],
+    [selectedAccount],
+  );
+
+  const portfolioTotalValue = useMemo(
+    () => getPortfolioTotal(securities, cashPositions),
+    [cashPositions, securities],
+  );
+  const unreadCount = useMemo(() => getTotalUnreadCount(), []);
+
+  if (!selectedAccount) {
+    return null;
+  }
 
   return (
     <View style={styles.screen}>
@@ -45,22 +77,33 @@ export function HomeScreen() {
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
         >
-          <HomeHeader />
-          <AccountsCarousel
+          <HomeHeader
             accounts={mockAccounts}
-            onAccountPress={(account) =>
-              navigation.navigate('Account', { accountId: account.id })
-            }
+            selectedAccountId={selectedAccountId}
+            onAccountSelect={(account) => setSelectedAccountId(account.id)}
           />
+
+          <View style={styles.portfolioCard}>
+            <PortfolioCard
+              cpid={selectedAccount.cpid}
+              balance={selectedAccount.balance}
+              currencyCode={selectedAccount.currencyCode}
+              dataAsOf={selectedAccount.dataAsOf}
+              onPress={() =>
+                navigation.navigate('Account', { accountId: selectedAccount.id })
+              }
+            />
+          </View>
+
           <AssetList
-            securities={mockSecurities}
-            cashPositions={mockCashPositions}
+            securities={securities}
+            cashPositions={cashPositions}
             portfolioTotalValue={portfolioTotalValue}
           />
         </ScrollView>
 
         <HomeBottomBar
-          onMarketsPress={() => navigation.navigate('Markets')}
+          unreadCount={unreadCount}
           onChatPress={() => navigation.navigate('Chat')}
         />
       </View>
@@ -81,4 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {},
+  portfolioCard: {
+    paddingHorizontal: spacing.xl,
+  },
 });

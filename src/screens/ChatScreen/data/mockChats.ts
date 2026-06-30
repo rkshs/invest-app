@@ -30,7 +30,7 @@ export const mockChats: Chat[] = [
   {
     id: 'chat-4',
     title: 'Поддержка Clearvest',
-    lastMessage: 'Ваш запрос №4821 принят в работу',
+    lastMessage: 'Ваш запрос №1001 принят в работу',
     timestamp: '1 д',
     avatarSeed: 'SUP',
   },
@@ -54,4 +54,8 @@ export const mockChats: Chat[] = [
 
 export function getChatById(chatId: string): Chat | undefined {
   return mockChats.find((chat) => chat.id === chatId);
+}
+
+export function getTotalUnreadCount(chats: Chat[] = mockChats): number {
+  return chats.reduce((total, chat) => total + (chat.unreadCount ?? 0), 0);
 }

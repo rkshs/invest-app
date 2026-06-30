@@ -28,7 +28,7 @@ const mockChatMessages: ChatMessage[] = [
   {
     id: 'msg-4',
     chatId: 'chat-4',
-    text: 'Ваш запрос №4821 принят в работу',
+    text: 'Ваш запрос №1001 принят в работу',
     senderName: 'Поддержка',
     isOwn: false,
     timestamp: '09:15',

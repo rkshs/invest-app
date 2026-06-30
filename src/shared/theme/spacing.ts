@@ -13,6 +13,4 @@ export const radius = {
   full: 999,
 } as const;
 
-export const layout = {
-  accountCardHeight: 148,
-} as const;
+export const layout = {} as const;
