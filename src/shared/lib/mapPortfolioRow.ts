@@ -1,3 +1,4 @@
+import { convertToUsd } from './convertPortfolioCurrency';
 import { getPositionPortfolioShare } from './formatFinance';
 import { AccountCurrency } from '../../types/accountCurrency';
 import { AccountPosition } from '../../types/accountPosition';
@@ -19,7 +20,10 @@ export function mapAccountPositionToPortfolioRow(
     isin: position.isin,
     securityType: position.securityType,
     quantity: position.quantity,
-    portfolioShare: getPositionPortfolioShare(totalValue, portfolioTotalValue),
+    portfolioShare: getPositionPortfolioShare(
+      convertToUsd(totalValue, position.currencyCode),
+      portfolioTotalValue,
+    ),
     totalValue,
     currencyCode: position.currencyCode,
   };
@@ -37,7 +41,10 @@ export function mapSecurityToPortfolioRow(
     isin: security.isin,
     securityType: security.securityType,
     quantity: security.quantity,
-    portfolioShare: getPositionPortfolioShare(security.price, portfolioTotalValue),
+    portfolioShare: getPositionPortfolioShare(
+      convertToUsd(security.price, security.currencyCode),
+      portfolioTotalValue,
+    ),
     totalValue: security.price,
     currencyCode: security.currencyCode,
   };
@@ -50,12 +57,12 @@ export function mapCashToPortfolioRow(
   return {
     id: cash.id,
     kind: 'cash',
-    name: 'Денежные средства',
+    name: cash.name,
     ticker: cash.currencyCode,
     isin: '',
     quantity: 0,
     portfolioShare: getPositionPortfolioShare(
-      cash.portfolioValue,
+      convertToUsd(cash.portfolioValue, cash.currencyCode),
       portfolioTotalValue,
     ),
     totalValue: cash.balance,
@@ -70,12 +77,12 @@ export function mapAccountCurrencyToPortfolioRow(
   return {
     id: `cash-${currency.id}`,
     kind: 'cash',
-    name: 'Денежные средства',
+    name: currency.name,
     ticker: currency.code,
     isin: '',
     quantity: 0,
     portfolioShare: getPositionPortfolioShare(
-      currency.balance,
+      convertToUsd(currency.balance, currency.code),
       portfolioTotalValue,
     ),
     totalValue: currency.balance,
@@ -84,15 +91,23 @@ export function mapAccountCurrencyToPortfolioRow(
 }
 
 export function getSecuritiesPortfolioTotal(securities: Security[]): number {
-  return securities.reduce((total, security) => total + security.price, 0);
+  return securities.reduce(
+    (total, security) =>
+      total + convertToUsd(security.price, security.currencyCode),
+    0,
+  );
 }
 
 export function getPortfolioTotal(
   securities: Security[],
   cashPositions: CashPosition[],
 ): number {
-  return (
-    getSecuritiesPortfolioTotal(securities) +
-    cashPositions.reduce((total, position) => total + position.portfolioValue, 0)
+  const securitiesTotal = getSecuritiesPortfolioTotal(securities);
+  const cashTotal = cashPositions.reduce(
+    (total, position) =>
+      total + convertToUsd(position.portfolioValue, position.currencyCode),
+    0,
   );
+
+  return securitiesTotal + cashTotal;
 }

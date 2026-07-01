@@ -14,9 +14,14 @@ import {
 } from '../../components/HomeBottomBar';
 import { HomeHeader } from '../../components/HomeHeader';
 import { PortfolioCard } from '../../components/PortfolioCard';
+import { PortfolioCurrencyToggle } from '../../components/PortfolioCurrencyToggle';
+import {
+  convertPortfolioAmount,
+  PortfolioDisplayCurrency,
+  toPortfolioCurrency,
+} from '../../shared/lib/convertPortfolioCurrency';
 import { getPortfolioTotal } from '../../shared/lib/mapPortfolioRow';
 import { colors, spacing } from '../../shared/theme';
-import { PortfolioCurrencyCode } from '../../types/portfolioCash';
 import { getCurrenciesForAccount } from './data/mockAccountCurrencies';
 import { mockAccounts } from './data/mockAccounts';
 import { getSecuritiesForAccount } from './data/mockAccountSecurities';
@@ -28,6 +33,8 @@ export function HomeScreen() {
   const navigation = useNavigation<HomeNavigationProp>();
   const bottomBarHeight = useHomeBottomBarHeight();
   const [selectedAccountId, setSelectedAccountId] = useState(mockAccounts[0]?.id ?? '1');
+  const [displayCurrency, setDisplayCurrency] =
+    useState<PortfolioDisplayCurrency>('USD');
 
   const selectedAccount = useMemo(
     () => mockAccounts.find((account) => account.id === selectedAccountId) ?? mockAccounts[0],
@@ -44,7 +51,8 @@ export function HomeScreen() {
       selectedAccount
         ? getCurrenciesForAccount(selectedAccount.id).map((currency) => ({
             id: `cash-${currency.id}`,
-            currencyCode: currency.code as PortfolioCurrencyCode,
+            name: currency.name,
+            currencyCode: currency.code,
             balance: currency.balance,
             portfolioValue: currency.balance,
           }))
@@ -57,6 +65,17 @@ export function HomeScreen() {
     [cashPositions, securities],
   );
   const unreadCount = useMemo(() => getTotalUnreadCount(), []);
+  const displayBalance = useMemo(() => {
+    if (!selectedAccount) {
+      return 0;
+    }
+
+    return convertPortfolioAmount(
+      selectedAccount.balance,
+      toPortfolioCurrency(selectedAccount.currencyCode),
+      displayCurrency,
+    );
+  }, [displayCurrency, selectedAccount]);
 
   if (!selectedAccount) {
     return null;
@@ -81,13 +100,14 @@ export function HomeScreen() {
             accounts={mockAccounts}
             selectedAccountId={selectedAccountId}
             onAccountSelect={(account) => setSelectedAccountId(account.id)}
+            onProfilePress={() => navigation.navigate('Settings')}
           />
 
           <View style={styles.portfolioCard}>
             <PortfolioCard
               cpid={selectedAccount.cpid}
-              balance={selectedAccount.balance}
-              currencyCode={selectedAccount.currencyCode}
+              balance={displayBalance}
+              currencyCode={displayCurrency}
               dataAsOf={selectedAccount.dataAsOf}
               onPress={() =>
                 navigation.navigate('Account', { accountId: selectedAccount.id })
@@ -95,10 +115,16 @@ export function HomeScreen() {
             />
           </View>
 
+          <PortfolioCurrencyToggle
+            selectedCurrency={displayCurrency}
+            onSelect={setDisplayCurrency}
+          />
+
           <AssetList
             securities={securities}
             cashPositions={cashPositions}
             portfolioTotalValue={portfolioTotalValue}
+            displayCurrency={displayCurrency}
           />
         </ScrollView>
 

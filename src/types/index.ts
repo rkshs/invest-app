@@ -4,7 +4,7 @@ export type { Chat } from './chat';
 export type { ChatMessage } from './chatMessage';
 export type { SecurityInstrumentType } from './accountPosition';
 export type { PortfolioRowData, PortfolioRowKind } from './portfolioRow';
-export type { CashPosition, PortfolioCurrencyCode } from './portfolioCash';
+export type { CashPosition, PortfolioCurrencyCode, PurchasedCurrency } from './portfolioCash';
 
 export type Asset = {
   id: string;
@@ -27,7 +27,7 @@ export type Account = {
   balance: number;
   changeFromZero: number;
   changePercentFromZero: number;
-  currencyCode?: 'RUB' | 'USD' | 'EUR';
+  currencyCode?: 'USD' | 'EUR';
   dataAsOf?: string;
 };
 
@@ -35,5 +35,5 @@ export type Security = Asset & {
   isin: string;
   securityType: SecurityInstrumentType;
   quantity: number;
-  currencyCode?: string;
+  currencyCode: 'USD' | 'EUR';
 };
