@@ -3,38 +3,50 @@ import { AccountCurrency } from '../../../types/accountCurrency';
 const accountCurrencies: Record<string, AccountCurrency[]> = {
   '1': [
     {
-      id: 'rub',
-      name: 'Российский рубль',
-      code: 'RUB',
-      balance: 15200,
+      id: 'usd',
+      name: 'Доллар США',
+      code: 'USD',
+      balance: 4200,
+    },
+    {
+      id: 'eur',
+      name: 'Евро',
+      code: 'EUR',
+      balance: 1800,
     },
     {
       id: 'cny',
       name: 'Китайский юань',
       code: 'CNY',
-      balance: 1800.5,
+      balance: 58000,
     },
   ],
   '2': [
-    {
-      id: 'rub',
-      name: 'Российский рубль',
-      code: 'RUB',
-      balance: 38500,
-    },
     {
       id: 'usd',
       name: 'Доллар США',
       code: 'USD',
       balance: 980,
     },
+    {
+      id: 'cny',
+      name: 'Китайский юань',
+      code: 'CNY',
+      balance: 12500,
+    },
   ],
   '3': [
     {
-      id: 'rub',
-      name: 'Российский рубль',
-      code: 'RUB',
+      id: 'eur',
+      name: 'Евро',
+      code: 'EUR',
       balance: 7200,
+    },
+    {
+      id: 'cny',
+      name: 'Китайский юань',
+      code: 'CNY',
+      balance: 34000,
     },
   ],
 };

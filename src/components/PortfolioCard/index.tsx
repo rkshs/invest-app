@@ -5,12 +5,13 @@ import {
   formatPortfolioDataTimestamp,
   formatPortfolioMoney,
 } from '../../shared/lib/formatFinance';
+import { PortfolioCurrency } from '../../shared/lib/convertPortfolioCurrency';
 import { colors, radius, spacing, typography } from '../../shared/theme';
 
 type PortfolioCardProps = {
   cpid: string;
   balance: number;
-  currencyCode?: string;
+  currencyCode?: PortfolioCurrency;
   dataAsOf?: string;
   width?: number;
   onPress?: () => void;
@@ -19,7 +20,7 @@ type PortfolioCardProps = {
 export function PortfolioCard({
   cpid,
   balance,
-  currencyCode = 'RUB',
+  currencyCode = 'USD',
   dataAsOf = '11:20',
   width,
   onPress,

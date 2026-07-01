@@ -10,7 +10,7 @@ export type AccountPosition = {
   unitPrice: number;
   changeAmount: number;
   changePercent: number;
-  currencyCode?: string;
+  currencyCode: 'USD' | 'EUR';
 };
 
 export type AccountPositionsSummary = {

@@ -2,22 +2,25 @@ import { CashPosition } from '../../../types/portfolioCash';
 
 export const mockCashPositions: CashPosition[] = [
   {
-    id: 'cash-rub',
-    currencyCode: 'RUB',
-    balance: 98000,
-    portfolioValue: 98000,
-  },
-  {
     id: 'cash-usd',
+    name: 'Доллар США',
     currencyCode: 'USD',
     balance: 4200,
-    portfolioValue: 385000,
+    portfolioValue: 4200,
   },
   {
     id: 'cash-eur',
+    name: 'Евро',
     currencyCode: 'EUR',
     balance: 1500,
-    portfolioValue: 162000,
+    portfolioValue: 1500,
+  },
+  {
+    id: 'cash-cny',
+    name: 'Китайский юань',
+    currencyCode: 'CNY',
+    balance: 58000,
+    portfolioValue: 58000,
   },
 ];
 

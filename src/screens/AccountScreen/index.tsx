@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { RootStackParamList } from '../../app/navigation';
 import { AccountStocksSection } from '../../components/AccountStocksSection';
 import { PortfolioCard } from '../../components/PortfolioCard';
+import { getPortfolioTotal } from '../../shared/lib/mapPortfolioRow';
 import { colors, spacing, typography } from '../../shared/theme';
 import { getCurrenciesForAccount } from '../HomeScreen/data/mockAccountCurrencies';
 import { formatAccountTitle } from '../../shared/lib/formatAccount';
@@ -13,6 +14,7 @@ import { getAccountById } from '../HomeScreen/data/mockAccounts';
 import {
   getPositionsForAccount,
   getPositionsSummary,
+  mapPositionToSecurity,
 } from '../HomeScreen/data/mockAccountPositions';
 
 type AccountRouteProp = RouteProp<RootStackParamList, 'Account'>;
@@ -33,6 +35,20 @@ export function AccountScreen() {
   const positionsSummary = useMemo(
     () => getPositionsSummary(positions),
     [positions],
+  );
+  const portfolioTotalValue = useMemo(
+    () =>
+      getPortfolioTotal(
+        positions.map(mapPositionToSecurity),
+        currencies.map((currency) => ({
+          id: `cash-${currency.id}`,
+          name: currency.name,
+          currencyCode: currency.code,
+          balance: currency.balance,
+          portfolioValue: currency.balance,
+        })),
+      ),
+    [currencies, positions],
   );
 
   useLayoutEffect(() => {
@@ -74,7 +90,8 @@ export function AccountScreen() {
         currencies={currencies}
         totalValue={positionsSummary.totalValue}
         totalChange={positionsSummary.totalChange}
-        portfolioTotalValue={account.balance}
+        portfolioTotalValue={portfolioTotalValue}
+        currencyCode={account.currencyCode ?? 'USD'}
       />
     </ScrollView>
   );

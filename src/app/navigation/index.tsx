@@ -6,6 +6,7 @@ import { ChatDetailScreen } from '../../screens/ChatDetailScreen';
 import { ChatScreen } from '../../screens/ChatScreen';
 import { HomeScreen } from '../../screens/HomeScreen';
 import { MarketsScreen } from '../../screens/MarketsScreen';
+import { SettingsScreen } from '../../screens/SettingsScreen';
 import { colors } from '../../shared/theme';
 
 const navigationTheme = {
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   Markets: undefined;
   Chat: undefined;
   ChatDetail: { chatId: string };
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -69,6 +71,15 @@ export function AppNavigation() {
           component={ChatDetailScreen}
           options={{
             headerShown: false,
+            animation: 'slide_from_right',
+            animationDuration: 300,
+            gestureEnabled: true,
+          }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
             animation: 'slide_from_right',
             animationDuration: 300,
             gestureEnabled: true,

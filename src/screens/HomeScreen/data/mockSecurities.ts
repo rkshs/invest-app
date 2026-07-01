@@ -8,8 +8,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0009029540',
     securityType: 'stock',
     quantity: 80,
-    price: 22400,
+    price: 2800,
     changePercent: 1.15,
+    currencyCode: 'USD',
   },
   {
     id: '2',
@@ -18,8 +19,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0007661625',
     securityType: 'stock',
     quantity: 300,
-    price: 39000,
+    price: 4200,
     changePercent: -0.95,
+    currencyCode: 'USD',
   },
   {
     id: '3',
@@ -28,8 +30,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0009024277',
     securityType: 'stock',
     quantity: 5,
-    price: 21500,
+    price: 2150,
     changePercent: 2.4,
+    currencyCode: 'USD',
   },
   {
     id: '4',
@@ -38,8 +41,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU000A107T19',
     securityType: 'stock',
     quantity: 12,
-    price: 48000,
+    price: 4800,
     changePercent: 3.1,
+    currencyCode: 'USD',
   },
   {
     id: '5',
@@ -48,8 +52,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0007288411',
     securityType: 'stock',
     quantity: 8,
-    price: 120000,
+    price: 12400,
     changePercent: -1.5,
+    currencyCode: 'USD',
   },
   {
     id: '6',
@@ -58,8 +63,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0006938994',
     securityType: 'stock',
     quantity: 25,
-    price: 15500,
+    price: 1650,
     changePercent: 0.8,
+    currencyCode: 'USD',
   },
   {
     id: '7',
@@ -68,8 +74,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU0007775219',
     securityType: 'stock',
     quantity: 100,
-    price: 23000,
+    price: 2500,
     changePercent: -0.2,
+    currencyCode: 'USD',
   },
   {
     id: '8',
@@ -78,8 +85,9 @@ export const mockSecurities: Security[] = [
     isin: 'RU000A0JP5V6',
     securityType: 'stock',
     quantity: 150,
-    price: 15000,
+    price: 1650,
     changePercent: 4.0,
+    currencyCode: 'USD',
   },
 ];
 

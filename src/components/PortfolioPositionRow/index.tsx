@@ -2,10 +2,13 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import {
   formatCashPositionMeta,
-  formatMoney,
   formatPortfolioMoney,
   formatPortfolioPositionMeta,
 } from '../../shared/lib/formatFinance';
+import {
+  isPurchasedCurrency,
+  toPortfolioCurrency,
+} from '../../shared/lib/convertPortfolioCurrency';
 import { getCurrencyAppearance } from '../../shared/lib/getCurrencyAppearance';
 import { getSecurityTypeLabel } from '../../shared/lib/getSecurityTypeLabel';
 import { getTickerAppearance } from '../../shared/lib/getTickerAppearance';
@@ -20,14 +23,16 @@ type PortfolioPositionRowProps = {
 const LOGO_SIZE = 36;
 
 export function PortfolioPositionRow({ item, isLast = false }: PortfolioPositionRowProps) {
-  const currencyCode = item.currencyCode ?? 'RUB';
   const isCash = item.kind === 'cash';
+  const valueCurrency = isCash
+    ? item.currencyCode ?? 'USD'
+    : toPortfolioCurrency(item.currencyCode);
+  const metaCurrency = isCash && isPurchasedCurrency(item.currencyCode ?? '')
+    ? item.currencyCode
+    : valueCurrency;
   const appearance = isCash
-    ? getCurrencyAppearance(currencyCode)
+    ? getCurrencyAppearance(item.ticker)
     : getTickerAppearance(item.ticker);
-  const formattedValue = isCash
-    ? formatPortfolioMoney(item.totalValue, currencyCode)
-    : formatMoney(item.totalValue);
 
   return (
     <View style={[styles.row, isLast && styles.rowLast]}>
@@ -46,7 +51,7 @@ export function PortfolioPositionRow({ item, isLast = false }: PortfolioPosition
         <Text style={styles.name}>{item.name}</Text>
         {isCash ? (
           <Text style={styles.detail}>
-            {formatCashPositionMeta(item.portfolioShare, currencyCode)}
+            {formatCashPositionMeta(item.portfolioShare, metaCurrency ?? 'USD')}
           </Text>
         ) : (
           <>
@@ -62,14 +67,16 @@ export function PortfolioPositionRow({ item, isLast = false }: PortfolioPosition
               {formatPortfolioPositionMeta(
                 item.quantity,
                 item.portfolioShare,
-                currencyCode,
+                valueCurrency,
               )}
             </Text>
           </>
         )}
       </View>
 
-      <Text style={styles.value}>{formattedValue}</Text>
+      <Text style={styles.value}>
+        {formatPortfolioMoney(item.totalValue, valueCurrency)}
+      </Text>
     </View>
   );
 }

@@ -1,13 +1,20 @@
-const rubFormatter = new Intl.NumberFormat('ru-RU', {
-  style: 'currency',
-  currency: 'RUB',
-  maximumFractionDigits: 0,
+import { PortfolioCurrency } from './convertPortfolioCurrency';
+
+const percentFormatter = new Intl.NumberFormat('ru-RU', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
 const currencyFormatters = {
-  RUB: new Intl.NumberFormat('ru-RU', {
+  USD: new Intl.NumberFormat('ru-RU', {
     style: 'currency',
-    currency: 'RUB',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }),
+  EUR: new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }),
@@ -17,25 +24,28 @@ const currencyFormatters = {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }),
-  USD: new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }),
 } as const;
-
-const percentFormatter = new Intl.NumberFormat('ru-RU', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 function normalizeSpaces(value: string): string {
   return value.replace(/\u00A0/g, ' ');
 }
 
-export function formatMoney(amount: number): string {
-  return normalizeSpaces(rubFormatter.format(amount));
+export function formatPortfolioMoney(
+  amount: number,
+  currency: string = 'USD',
+): string {
+  const formatted = new Intl.NumberFormat('ru-RU', {
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+  return `${formatted} ${currency}`;
+}
+
+export function formatMoney(
+  amount: number,
+  currency: PortfolioCurrency = 'USD',
+): string {
+  return formatPortfolioMoney(amount, currency);
 }
 
 export function formatCurrencyBalance(
@@ -53,18 +63,23 @@ export function formatPercent(value: number): string {
 export function formatAccountDynamics(
   changeFromZero: number,
   changePercentFromZero: number,
+  currency: PortfolioCurrency = 'USD',
 ): string {
-  return `${formatMoney(changeFromZero)} • ${formatPercent(changePercentFromZero)}`;
+  return `${formatMoney(changeFromZero, currency)} • ${formatPercent(changePercentFromZero)}`;
 }
 
-export function formatPositionQuantity(quantity: number, unitPrice: number): string {
-  return `${quantity} шт × ${formatMoney(unitPrice)}`;
+export function formatPositionQuantity(
+  quantity: number,
+  unitPrice: number,
+  currency: PortfolioCurrency = 'USD',
+): string {
+  return `${quantity} шт × ${formatMoney(unitPrice, currency)}`;
 }
 
 export function formatPortfolioPositionMeta(
   quantity: number,
   portfolioShare: number,
-  currency = 'RUB',
+  currency: string = 'USD',
 ): string {
   const share = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 1,
@@ -76,7 +91,7 @@ export function formatPortfolioPositionMeta(
 
 export function formatCashPositionMeta(
   portfolioShare: number,
-  currency = 'RUB',
+  currency: string = 'USD',
 ): string {
   const share = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 1,
@@ -84,17 +99,6 @@ export function formatCashPositionMeta(
   }).format(portfolioShare);
 
   return `Деньги · ${share}% · ${currency}`;
-}
-
-export function formatPortfolioMoney(
-  amount: number,
-  currency = 'RUB',
-): string {
-  const formatted = new Intl.NumberFormat('ru-RU', {
-    maximumFractionDigits: 0,
-  }).format(amount);
-
-  return `${formatted} ${currency}`;
 }
 
 export function formatPortfolioDataTimestamp(time: string): string {
@@ -115,9 +119,12 @@ export function getPositionPortfolioShare(
 export function formatPositionDynamics(
   changeAmount: number,
   changePercent: number,
+  currency: PortfolioCurrency = 'USD',
 ): string {
   const amount =
-    changeAmount > 0 ? `+${formatMoney(changeAmount)}` : formatMoney(changeAmount);
+    changeAmount > 0
+      ? `+${formatMoney(changeAmount, currency)}`
+      : formatMoney(changeAmount, currency);
 
   return `${amount} • ${formatPercent(changePercent)}`;
 }
