@@ -4,6 +4,8 @@ export type Chat = {
   lastMessage: string;
   lastMessagePrefix?: string;
   timestamp: string;
+  lastMessageAt: number;
   unreadCount?: number;
   avatarSeed: string;
+  clientId?: string;
 };

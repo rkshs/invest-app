@@ -1,22 +1,24 @@
 import { useLayoutEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { RootStackParamList } from '../../app/navigation';
+import { ClientStackParamList } from '../../app/navigation';
 import { SettingsExpandableRow } from '../../components/SettingsExpandableRow';
+import { useAuth } from '../../features/auth/model/AuthContext';
 import { ChangePasswordForm } from '../../features/settings/ui/ChangePasswordForm';
 import { ChangePinForm } from '../../features/settings/ui/ChangePinForm';
 import { LinkedDevicesList } from '../../features/settings/ui/LinkedDevicesList';
-import { colors, radius, spacing } from '../../shared/theme';
+import { colors, radius, spacing, typography } from '../../shared/theme';
 
 type SettingsNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
+  ClientStackParamList,
   'Settings'
 >;
 
 export function SettingsScreen() {
   const navigation = useNavigation<SettingsNavigationProp>();
+  const { logout } = useAuth();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useLayoutEffect(() => {
@@ -69,6 +71,15 @@ export function SettingsScreen() {
           <LinkedDevicesList />
         </SettingsExpandableRow>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Выйти"
+        onPress={logout}
+        style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}
+      >
+        <Text style={styles.logoutButtonText}>Выйти</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -93,5 +104,23 @@ const styles = StyleSheet.create({
   headerBackground: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  logoutButton: {
+    marginTop: spacing.lg,
+    height: 48,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutButtonText: {
+    fontFamily: typography.fontFamily.semiBold,
+    fontSize: typography.fontSize.sm + 1,
+    color: colors.red,
+  },
+  pressed: {
+    opacity: 0.85,
   },
 });

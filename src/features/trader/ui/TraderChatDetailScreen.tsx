@@ -1,34 +1,53 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ClientStackParamList } from '../../app/navigation';
-import { ChatDetailHeader } from '../../components/ChatDetailHeader';
-import { ChatMessageBubble } from '../../components/ChatMessageBubble';
-import { ChatMessageInput } from '../../components/ChatMessageInput';
-import { colors, spacing, typography } from '../../shared/theme';
-import { ChatMessage } from '../../types/chatMessage';
-import { useChatConversation } from '../../features/chat';
+import { TraderStackParamList } from '../../../app/navigation';
+import { ChatMessageBubble } from '../../../components/ChatMessageBubble';
+import { ChatMessageInput } from '../../../components/ChatMessageInput';
+import { getClientByChatId } from '../../../entities/client';
+import { useChatConversation } from '../../chat';
+import { colors, spacing, typography } from '../../../shared/theme';
+import { ChatMessage } from '../../../types/chatMessage';
+import { useTraderChats } from '../model/TraderChatsContext';
+import { TraderChatDetailHeader } from './TraderChatDetailHeader';
 
-type ChatDetailRouteProp = RouteProp<ClientStackParamList, 'ChatDetail'>;
-type ChatDetailNavigationProp = NativeStackNavigationProp<
-  ClientStackParamList,
-  'ChatDetail'
+type TraderChatDetailRouteProp = RouteProp<TraderStackParamList, 'TraderChatDetail'>;
+type TraderChatDetailNavigationProp = NativeStackNavigationProp<
+  TraderStackParamList,
+  'TraderChatDetail'
 >;
 
-export function ChatDetailScreen() {
-  const route = useRoute<ChatDetailRouteProp>();
-  const navigation = useNavigation<ChatDetailNavigationProp>();
+export function TraderChatDetailScreen() {
+  const route = useRoute<TraderChatDetailRouteProp>();
+  const navigation = useNavigation<TraderChatDetailNavigationProp>();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<ChatMessage>>(null);
+  const { markChatRead } = useTraderChats();
   const { chat, messages, sendMessage, isReplyPending } = useChatConversation(
     route.params.chatId,
   );
+  const client = chat ? getClientByChatId(chat.id) : undefined;
+
+  useEffect(() => {
+    markChatRead(route.params.chatId);
+  }, [markChatRead, route.params.chatId]);
 
   const scrollToLatestMessage = () => {
     listRef.current?.scrollToEnd({ animated: true });
+  };
+
+  const handlePortfolioPress = () => {
+    if (!client) {
+      return;
+    }
+
+    navigation.navigate('TraderClientPortfolio', {
+      accountId: client.accountId,
+      clientName: client.name,
+    });
   };
 
   if (!chat) {
@@ -41,9 +60,11 @@ export function ChatDetailScreen() {
 
   return (
     <View style={styles.screen}>
-      <ChatDetailHeader
-        chat={chat}
+      <TraderChatDetailHeader
+        clientName={client?.name ?? chat.title}
+        client={client}
         onBackPress={() => navigation.goBack()}
+        onPortfolioPress={client ? handlePortfolioPress : undefined}
       />
 
       <FlatList

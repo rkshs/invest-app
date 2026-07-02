@@ -6,6 +6,7 @@ import { Chat } from '../../types/chat';
 
 type ChatListItemProps = {
   chat: Chat;
+  title?: string;
   onPress?: (chat: Chat) => void;
 };
 
@@ -19,14 +20,15 @@ function formatPreview(chat: Chat): string {
   return chat.lastMessage;
 }
 
-export function ChatListItem({ chat, onPress }: ChatListItemProps) {
+export function ChatListItem({ chat, title, onPress }: ChatListItemProps) {
   const avatar = getTickerAppearance(chat.avatarSeed);
   const preview = formatPreview(chat);
+  const displayTitle = title ?? chat.title;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={chat.title}
+      accessibilityLabel={displayTitle}
       onPress={() => onPress?.(chat)}
       style={({ pressed }) => [styles.container, pressed && styles.pressed]}
     >
@@ -41,7 +43,7 @@ export function ChatListItem({ chat, onPress }: ChatListItemProps) {
       <View style={styles.content}>
         <View style={styles.topRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {chat.title}
+            {displayTitle}
           </Text>
           <Text style={styles.timestamp}>{chat.timestamp}</Text>
         </View>
