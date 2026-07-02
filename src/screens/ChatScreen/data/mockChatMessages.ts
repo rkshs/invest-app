@@ -49,6 +49,14 @@ const mockChatMessages: ChatMessage[] = [
     isOwn: false,
     timestamp: '16:20',
   },
+  {
+    id: 'msg-client-trader-1',
+    chatId: 'chat-client-trader',
+    text: 'Добрый день! Готов ответить на ваши вопросы по портфелю.',
+    senderName: 'Александр',
+    isOwn: false,
+    timestamp: '10:45',
+  },
 ];
 
 export function getMessageForChat(chatId: string): ChatMessage | undefined {

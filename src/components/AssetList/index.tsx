@@ -59,8 +59,8 @@ export function AssetList({
 
   return (
     <View style={styles.container}>
-      <PortfolioListSection title="Бумаги" items={securityRows} />
       <PortfolioListSection title="Денежные средства" items={cashRows} />
+      <PortfolioListSection title="Бумаги" items={securityRows} />
     </View>
   );
 }

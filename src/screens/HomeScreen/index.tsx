@@ -3,7 +3,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { RootStackParamList } from '../../app/navigation';
+import { ClientStackParamList } from '../../app/navigation';
 import { AssetList } from '../../components/AssetList';
 import {
   BOTTOM_SCROLL_FADE_HEIGHT,
@@ -25,9 +25,9 @@ import { colors, spacing } from '../../shared/theme';
 import { getCurrenciesForAccount } from './data/mockAccountCurrencies';
 import { mockAccounts } from './data/mockAccounts';
 import { getSecuritiesForAccount } from './data/mockAccountSecurities';
-import { getTotalUnreadCount } from '../ChatScreen/data/mockChats';
+import { getClientUnreadCount, CLIENT_TRADER_CHAT_ID } from '../ChatScreen/data/mockChats';
 
-type HomeNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type HomeNavigationProp = NativeStackNavigationProp<ClientStackParamList, 'Home'>;
 
 export function HomeScreen() {
   const navigation = useNavigation<HomeNavigationProp>();
@@ -64,7 +64,7 @@ export function HomeScreen() {
     () => getPortfolioTotal(securities, cashPositions),
     [cashPositions, securities],
   );
-  const unreadCount = useMemo(() => getTotalUnreadCount(), []);
+  const unreadCount = useMemo(() => getClientUnreadCount(), []);
   const displayBalance = useMemo(() => {
     if (!selectedAccount) {
       return 0;
@@ -130,7 +130,9 @@ export function HomeScreen() {
 
         <HomeBottomBar
           unreadCount={unreadCount}
-          onChatPress={() => navigation.navigate('Chat')}
+          onChatPress={() =>
+            navigation.navigate('ChatDetail', { chatId: CLIENT_TRADER_CHAT_ID })
+          }
         />
       </View>
     </View>

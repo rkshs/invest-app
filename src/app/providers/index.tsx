@@ -8,6 +8,7 @@ import { ReactNode, useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { applyDefaultFontFamily } from '../../shared/theme/applyDefaultFontFamily';
+import { AuthProvider } from '../../features/auth/model/AuthContext';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -30,5 +31,9 @@ export function AppProviders({ children }: AppProvidersProps) {
     return null;
   }
 
-  return <SafeAreaProvider>{children}</SafeAreaProvider>;
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </SafeAreaProvider>
+  );
 }
