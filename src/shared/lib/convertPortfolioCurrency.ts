@@ -40,6 +40,20 @@ export function convertPortfolioAmount(
   return Math.round(amountInUsd * USD_TO_EUR);
 }
 
+export function convertPurchasedCurrencyAmount(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: PortfolioDisplayCurrency,
+): number {
+  const amountInUsd = convertToUsd(amount, fromCurrency);
+
+  if (toCurrency === 'USD') {
+    return amountInUsd;
+  }
+
+  return Math.round(amountInUsd * USD_TO_EUR);
+}
+
 export function toPortfolioCurrency(
   currency: string | undefined,
   fallback: PortfolioCurrency = 'USD',

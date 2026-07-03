@@ -1,53 +1,60 @@
-import { useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TraderStackParamList } from '../../../app/navigation';
-import { getClientByChatId, isTrustedClient } from '../../../entities/client';
+import { getAccountById } from '../../../screens/HomeScreen/data/mockAccounts';
 import { ChatListItem } from '../../../components/ChatListItem';
 import { colors, spacing } from '../../../shared/theme';
 import { Chat } from '../../../types/chat';
 import { useTraderChats } from '../model/TraderChatsContext';
-import { TraderChatListHeader } from './TraderChatListHeader';
+import { TraderClientSubChatsHeader } from './TraderClientSubChatsHeader';
 
-type TraderChatListNavigationProp = NativeStackNavigationProp<
+type TraderClientSubChatsRouteProp = RouteProp<
   TraderStackParamList,
-  'TraderChatList'
+  'TraderClientSubChats'
+>;
+type TraderClientSubChatsNavigationProp = NativeStackNavigationProp<
+  TraderStackParamList,
+  'TraderClientSubChats'
 >;
 
-export function TraderChatListScreen() {
-  const navigation = useNavigation<TraderChatListNavigationProp>();
+function getSubChatTitle(chat: Chat): string {
+  const account = chat.accountId ? getAccountById(chat.accountId) : undefined;
+
+  if (!account) {
+    return chat.title;
+  }
+
+  return `CPID ${account.cpid}`;
+}
+
+export function TraderClientSubChatsScreen() {
+  const route = useRoute<TraderClientSubChatsRouteProp>();
+  const navigation = useNavigation<TraderClientSubChatsNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { listChats } = useTraderChats();
+  const { getSubChats } = useTraderChats();
+  const subChats = getSubChats(route.params.parentChatId);
 
   const handleChatPress = (chat: Chat) => {
-    const client = getClientByChatId(chat.id);
-
-    if (client && isTrustedClient(client)) {
-      navigation.navigate('TraderClientSubChats', {
-        parentChatId: chat.id,
-        clientName: client.name,
-      });
-      return;
-    }
-
     navigation.navigate('TraderChatDetail', { chatId: chat.id });
   };
 
   return (
     <View style={styles.screen}>
-      <TraderChatListHeader
-        onSettingsPress={() => navigation.navigate('TraderSettings')}
+      <TraderClientSubChatsHeader
+        clientName={route.params.clientName}
+        onBackPress={() => navigation.goBack()}
       />
 
       <FlatList
-        data={listChats}
+        data={subChats}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ChatListItem
             chat={item}
-            title={getClientByChatId(item.id)?.name ?? item.title}
+            title={getSubChatTitle(item)}
             onPress={handleChatPress}
           />
         )}

@@ -90,15 +90,19 @@ export function formatPortfolioPositionMeta(
 }
 
 export function formatCashPositionMeta(
+  quantity: number,
   portfolioShare: number,
   currency: string = 'USD',
 ): string {
+  const formattedQuantity = new Intl.NumberFormat('ru-RU', {
+    maximumFractionDigits: 2,
+  }).format(quantity);
   const share = new Intl.NumberFormat('ru-RU', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
   }).format(portfolioShare);
 
-  return `Деньги · ${share}% · ${currency}`;
+  return `${formattedQuantity} ${currency} · ${share}%`;
 }
 
 export function formatPortfolioDataTimestamp(time: string): string {

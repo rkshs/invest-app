@@ -8,4 +8,7 @@ export type Chat = {
   unreadCount?: number;
   avatarSeed: string;
   clientId?: string;
+  accountId?: string;
+  parentChatId?: string;
+  isTrustedPersonEntry?: boolean;
 };

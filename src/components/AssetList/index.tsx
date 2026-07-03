@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   convertPortfolioAmount,
+  convertPurchasedCurrencyAmount,
   PortfolioDisplayCurrency,
 } from '../../shared/lib/convertPortfolioCurrency';
 import {
@@ -47,10 +48,20 @@ export function AssetList({
 
   const cashRows = useMemo(
     () =>
-      cashPositions.map((cash) =>
-        mapCashToPortfolioRow(cash, portfolioTotalValue),
-      ),
-    [cashPositions, portfolioTotalValue],
+      cashPositions.map((cash) => {
+        const row = mapCashToPortfolioRow(cash, portfolioTotalValue);
+
+        return {
+          ...row,
+          totalValue: convertPurchasedCurrencyAmount(
+            cash.balance,
+            cash.currencyCode,
+            displayCurrency,
+          ),
+          currencyCode: displayCurrency,
+        };
+      }),
+    [cashPositions, displayCurrency, portfolioTotalValue],
   );
 
   if (securityRows.length === 0 && cashRows.length === 0) {
@@ -60,7 +71,7 @@ export function AssetList({
   return (
     <View style={styles.container}>
       <PortfolioListSection title="Денежные средства" items={cashRows} />
-      <PortfolioListSection title="Бумаги" items={securityRows} />
+      <PortfolioListSection title="Ценные бумаги" items={securityRows} />
     </View>
   );
 }

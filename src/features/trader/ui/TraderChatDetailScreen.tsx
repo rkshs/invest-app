@@ -7,7 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TraderStackParamList } from '../../../app/navigation';
 import { ChatMessageBubble } from '../../../components/ChatMessageBubble';
 import { ChatMessageInput } from '../../../components/ChatMessageInput';
-import { getClientByChatId } from '../../../entities/client';
+import {
+  getAccountForClientChat,
+  getClientByChatId,
+} from '../../../entities/client';
 import { useChatConversation } from '../../chat';
 import { colors, spacing, typography } from '../../../shared/theme';
 import { ChatMessage } from '../../../types/chatMessage';
@@ -30,6 +33,7 @@ export function TraderChatDetailScreen() {
     route.params.chatId,
   );
   const client = chat ? getClientByChatId(chat.id) : undefined;
+  const account = chat ? getAccountForClientChat(chat.id) : undefined;
 
   useEffect(() => {
     markChatRead(route.params.chatId);
@@ -40,12 +44,12 @@ export function TraderChatDetailScreen() {
   };
 
   const handlePortfolioPress = () => {
-    if (!client) {
+    if (!client || !account) {
       return;
     }
 
     navigation.navigate('TraderClientPortfolio', {
-      accountId: client.accountId,
+      accountId: account.id,
       clientName: client.name,
     });
   };
@@ -62,9 +66,9 @@ export function TraderChatDetailScreen() {
     <View style={styles.screen}>
       <TraderChatDetailHeader
         clientName={client?.name ?? chat.title}
-        client={client}
+        accountId={account?.id}
         onBackPress={() => navigation.goBack()}
-        onPortfolioPress={client ? handlePortfolioPress : undefined}
+        onPortfolioPress={client && account ? handlePortfolioPress : undefined}
       />
 
       <FlatList

@@ -12,6 +12,7 @@ export type ClientStackParamList = {
 
 export type TraderStackParamList = {
   TraderChatList: undefined;
+  TraderClientSubChats: { parentChatId: string; clientName: string };
   TraderChatDetail: { chatId: string };
   TraderClientPortfolio: { accountId: string; clientName: string };
   TraderSettings: undefined;

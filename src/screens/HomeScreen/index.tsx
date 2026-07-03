@@ -15,17 +15,19 @@ import {
 import { HomeHeader } from '../../components/HomeHeader';
 import { PortfolioCard } from '../../components/PortfolioCard';
 import { PortfolioCurrencyToggle } from '../../components/PortfolioCurrencyToggle';
+import { PortfolioDisplayCurrency } from '../../shared/lib/convertPortfolioCurrency';
 import {
-  convertPortfolioAmount,
-  PortfolioDisplayCurrency,
-  toPortfolioCurrency,
-} from '../../shared/lib/convertPortfolioCurrency';
-import { getPortfolioTotal } from '../../shared/lib/mapPortfolioRow';
+  getPortfolioTotal,
+  getPortfolioTotalInDisplayCurrency,
+} from '../../shared/lib/mapPortfolioRow';
 import { colors, spacing } from '../../shared/theme';
 import { getCurrenciesForAccount } from './data/mockAccountCurrencies';
 import { mockAccounts } from './data/mockAccounts';
 import { getSecuritiesForAccount } from './data/mockAccountSecurities';
-import { getClientUnreadCount, CLIENT_TRADER_CHAT_ID } from '../ChatScreen/data/mockChats';
+import {
+  getClientTraderChatId,
+  getClientUnreadCountForAccount,
+} from '../ChatScreen/data/mockChats';
 
 type HomeNavigationProp = NativeStackNavigationProp<ClientStackParamList, 'Home'>;
 
@@ -64,18 +66,23 @@ export function HomeScreen() {
     () => getPortfolioTotal(securities, cashPositions),
     [cashPositions, securities],
   );
-  const unreadCount = useMemo(() => getClientUnreadCount(), []);
-  const displayBalance = useMemo(() => {
-    if (!selectedAccount) {
-      return 0;
-    }
-
-    return convertPortfolioAmount(
-      selectedAccount.balance,
-      toPortfolioCurrency(selectedAccount.currencyCode),
-      displayCurrency,
-    );
-  }, [displayCurrency, selectedAccount]);
+  const clientTraderChatId = useMemo(
+    () => getClientTraderChatId(selectedAccountId),
+    [selectedAccountId],
+  );
+  const unreadCount = useMemo(
+    () => getClientUnreadCountForAccount(selectedAccountId),
+    [selectedAccountId],
+  );
+  const displayBalance = useMemo(
+    () =>
+      getPortfolioTotalInDisplayCurrency(
+        securities,
+        cashPositions,
+        displayCurrency,
+      ),
+    [cashPositions, displayCurrency, securities],
+  );
 
   if (!selectedAccount) {
     return null;
@@ -130,9 +137,13 @@ export function HomeScreen() {
 
         <HomeBottomBar
           unreadCount={unreadCount}
-          onChatPress={() =>
-            navigation.navigate('ChatDetail', { chatId: CLIENT_TRADER_CHAT_ID })
-          }
+          onChatPress={() => {
+            if (!clientTraderChatId) {
+              return;
+            }
+
+            navigation.navigate('ChatDetail', { chatId: clientTraderChatId });
+          }}
         />
       </View>
     </View>

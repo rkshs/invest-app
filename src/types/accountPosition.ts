@@ -1,4 +1,4 @@
-export type SecurityInstrumentType = 'stock' | 'bond' | 'future';
+export type SecurityInstrumentType = 'stock' | 'bond' | 'future' | 'etf';
 
 export type AccountPosition = {
   id: string;
