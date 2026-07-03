@@ -2,9 +2,11 @@ import { Security } from '../../../types';
 import { mockSecurities } from './mockSecurities';
 
 const accountSecurityIds: Record<string, string[]> = {
-  '1': ['1', '2', '5'],
-  '2': ['3', '4', '8'],
+  '1': ['1', '2', '3'],
+  '2': ['4', '5', '8'],
   '3': ['6', '7'],
+  '4': ['4', '5'],
+  '5': ['8', '3'],
 };
 
 export function getSecuritiesForAccount(accountId: string): Security[] {

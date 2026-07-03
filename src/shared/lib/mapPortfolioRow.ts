@@ -1,4 +1,10 @@
-import { convertToUsd } from './convertPortfolioCurrency';
+import {
+  convertPortfolioAmount,
+  convertPurchasedCurrencyAmount,
+  convertToUsd,
+  PortfolioDisplayCurrency,
+  toPortfolioCurrency,
+} from './convertPortfolioCurrency';
 import { getPositionPortfolioShare } from './formatFinance';
 import { AccountCurrency } from '../../types/accountCurrency';
 import { AccountPosition } from '../../types/accountPosition';
@@ -60,7 +66,7 @@ export function mapCashToPortfolioRow(
     name: cash.name,
     ticker: cash.currencyCode,
     isin: '',
-    quantity: 0,
+    quantity: cash.balance,
     portfolioShare: getPositionPortfolioShare(
       convertToUsd(cash.portfolioValue, cash.currencyCode),
       portfolioTotalValue,
@@ -80,7 +86,7 @@ export function mapAccountCurrencyToPortfolioRow(
     name: currency.name,
     ticker: currency.code,
     isin: '',
-    quantity: 0,
+    quantity: currency.balance,
     portfolioShare: getPositionPortfolioShare(
       convertToUsd(currency.balance, currency.code),
       portfolioTotalValue,
@@ -106,6 +112,35 @@ export function getPortfolioTotal(
   const cashTotal = cashPositions.reduce(
     (total, position) =>
       total + convertToUsd(position.portfolioValue, position.currencyCode),
+    0,
+  );
+
+  return securitiesTotal + cashTotal;
+}
+
+export function getPortfolioTotalInDisplayCurrency(
+  securities: Security[],
+  cashPositions: CashPosition[],
+  displayCurrency: PortfolioDisplayCurrency,
+): number {
+  const securitiesTotal = securities.reduce(
+    (total, security) =>
+      total +
+      convertPortfolioAmount(
+        security.price,
+        toPortfolioCurrency(security.currencyCode),
+        displayCurrency,
+      ),
+    0,
+  );
+  const cashTotal = cashPositions.reduce(
+    (total, position) =>
+      total +
+      convertPurchasedCurrencyAmount(
+        position.portfolioValue,
+        position.currencyCode,
+        displayCurrency,
+      ),
     0,
   );
 

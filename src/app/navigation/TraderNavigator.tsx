@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TraderChatsProvider } from '../../features/trader/model/TraderChatsContext';
 import { TraderChatDetailScreen } from '../../features/trader/ui/TraderChatDetailScreen';
 import { TraderChatListScreen } from '../../features/trader/ui/TraderChatListScreen';
+import { TraderClientSubChatsScreen } from '../../features/trader/ui/TraderClientSubChatsScreen';
 import { TraderClientPortfolioScreen } from '../../features/trader/ui/TraderClientPortfolioScreen';
 import { TraderSettingsScreen } from '../../features/trader/ui/TraderSettingsScreen';
 import { TraderStackParamList } from './types';
@@ -17,6 +18,16 @@ export function TraderNavigator() {
           name="TraderChatList"
           component={TraderChatListScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TraderClientSubChats"
+          component={TraderClientSubChatsScreen}
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+            animationDuration: 300,
+            gestureEnabled: true,
+          }}
         />
         <Stack.Screen
           name="TraderChatDetail"

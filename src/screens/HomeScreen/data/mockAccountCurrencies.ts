@@ -49,6 +49,34 @@ const accountCurrencies: Record<string, AccountCurrency[]> = {
       balance: 34000,
     },
   ],
+  '4': [
+    {
+      id: 'usd',
+      name: 'Доллар США',
+      code: 'USD',
+      balance: 5100,
+    },
+    {
+      id: 'eur',
+      name: 'Евро',
+      code: 'EUR',
+      balance: 2400,
+    },
+  ],
+  '5': [
+    {
+      id: 'eur',
+      name: 'Евро',
+      code: 'EUR',
+      balance: 3900,
+    },
+    {
+      id: 'usd',
+      name: 'Доллар США',
+      code: 'USD',
+      balance: 1800,
+    },
+  ],
 };
 
 export function getCurrenciesForAccount(accountId: string): AccountCurrency[] {

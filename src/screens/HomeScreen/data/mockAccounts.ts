@@ -31,6 +31,26 @@ export const mockAccounts: Account[] = [
     currencyCode: 'EUR',
     dataAsOf: '11:20',
   },
+  {
+    id: '4',
+    cpid: '700104',
+    ownerName: 'Образец В.В.',
+    balance: 48200,
+    changeFromZero: 1200,
+    changePercentFromZero: 2.55,
+    currencyCode: 'USD',
+    dataAsOf: '11:20',
+  },
+  {
+    id: '5',
+    cpid: '700105',
+    ownerName: 'Образец В.В.',
+    balance: 31800,
+    changeFromZero: -420,
+    changePercentFromZero: -1.3,
+    currencyCode: 'EUR',
+    dataAsOf: '11:20',
+  },
 ];
 
 export function getAccountById(accountId: string): Account | undefined {

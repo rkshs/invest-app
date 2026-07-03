@@ -4,7 +4,7 @@ const mockChatMessages: ChatMessage[] = [
   {
     id: 'msg-1',
     chatId: 'chat-1',
-    text: 'Как думаете по SBER после отчёта?',
+    text: 'Как думаете по AAPL после отчёта?',
     senderName: 'Алексей',
     isOwn: false,
     timestamp: '14:32',
@@ -51,11 +51,43 @@ const mockChatMessages: ChatMessage[] = [
   },
   {
     id: 'msg-client-trader-1',
-    chatId: 'chat-client-trader',
+    chatId: 'chat-client-trader-1',
     text: 'Добрый день! Готов ответить на ваши вопросы по портфелю.',
     senderName: 'Александр',
     isOwn: false,
     timestamp: '10:45',
+  },
+  {
+    id: 'msg-client-trader-2',
+    chatId: 'chat-client-trader-2',
+    text: 'Пришлю обновлённый дивидендный календарь по вашему счёту.',
+    senderName: 'Александр',
+    isOwn: false,
+    timestamp: '09:30',
+  },
+  {
+    id: 'msg-client-trader-3-700103',
+    chatId: 'chat-client-trader-3-700103',
+    text: 'Подскажите по диверсификации портфеля',
+    senderName: 'Александр',
+    isOwn: false,
+    timestamp: '11:10',
+  },
+  {
+    id: 'msg-client-trader-3-700104',
+    chatId: 'chat-client-trader-3-700104',
+    text: 'Нужно купить BND на 5 000 USD по счёту 700104',
+    senderName: 'Александр',
+    isOwn: false,
+    timestamp: '11:25',
+  },
+  {
+    id: 'msg-client-trader-3-700105',
+    chatId: 'chat-client-trader-3-700105',
+    text: 'Проверьте, пожалуйста, лимитные заявки по TSLA',
+    senderName: 'Александр',
+    isOwn: false,
+    timestamp: '09:40',
   },
 ];
 

@@ -5,10 +5,7 @@ import {
   formatPortfolioMoney,
   formatPortfolioPositionMeta,
 } from '../../shared/lib/formatFinance';
-import {
-  isPurchasedCurrency,
-  toPortfolioCurrency,
-} from '../../shared/lib/convertPortfolioCurrency';
+import { toPortfolioCurrency } from '../../shared/lib/convertPortfolioCurrency';
 import { getCurrencyAppearance } from '../../shared/lib/getCurrencyAppearance';
 import { getSecurityTypeLabel } from '../../shared/lib/getSecurityTypeLabel';
 import { getTickerAppearance } from '../../shared/lib/getTickerAppearance';
@@ -24,12 +21,7 @@ const LOGO_SIZE = 36;
 
 export function PortfolioPositionRow({ item, isLast = false }: PortfolioPositionRowProps) {
   const isCash = item.kind === 'cash';
-  const valueCurrency = isCash
-    ? item.currencyCode ?? 'USD'
-    : toPortfolioCurrency(item.currencyCode);
-  const metaCurrency = isCash && isPurchasedCurrency(item.currencyCode ?? '')
-    ? item.currencyCode
-    : valueCurrency;
+  const valueCurrency = toPortfolioCurrency(item.currencyCode);
   const appearance = isCash
     ? getCurrencyAppearance(item.ticker)
     : getTickerAppearance(item.ticker);
@@ -51,7 +43,7 @@ export function PortfolioPositionRow({ item, isLast = false }: PortfolioPosition
         <Text style={styles.name}>{item.name}</Text>
         {isCash ? (
           <Text style={styles.detail}>
-            {formatCashPositionMeta(item.portfolioShare, metaCurrency ?? 'USD')}
+            {formatCashPositionMeta(item.quantity, item.portfolioShare, item.ticker)}
           </Text>
         ) : (
           <>

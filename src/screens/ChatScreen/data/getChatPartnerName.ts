@@ -1,7 +1,11 @@
 import { Chat } from '../../../types/chat';
 
+function isClientTraderChatId(chatId: string): boolean {
+  return chatId.startsWith('chat-client-trader-');
+}
+
 export function getChatPartnerName(chat: Chat): string {
-  if (chat.id === 'chat-client-trader') {
+  if (isClientTraderChatId(chat.id)) {
     return 'Александр';
   }
 

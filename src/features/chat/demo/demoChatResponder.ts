@@ -2,6 +2,12 @@
  * Демо-ответчик для презентаций. Без API: подбирает короткий ответ по ключевым словам.
  * Удалите всю папку demo/ после перехода на backend.
  */
+import {
+  getOperationExecutedReply,
+  isClientTraderChat,
+  shouldReplyWithOperationConfirmation,
+} from './clientTraderOperationReply';
+
 type DemoChatContext = {
   chatId: string;
   chatTitle: string;
@@ -24,17 +30,24 @@ const RESPONSE_RULES: ResponseRule[] = [
     replies: GREETING_REPLIES,
   },
   {
-    pattern: /sber|сбер|сбербанк/i,
+    pattern: /aapl|apple|эпл|эппл/i,
     replies: [
-      'По SBER после отчёта базовый сценарий — удержание с акцентом на дивиденды. Следим за маржой и ставками.',
-      'SBER выглядит устойчиво для дивидендной части портфеля, но рост ограничен макрофоном.',
+      'По AAPL после отчёта базовый сценарий — удержание с акцентом на buyback и сервисы. Следим за маржой и спросом на iPhone.',
+      'AAPL выглядит устойчиво для ядра портфеля, но рост ограничен оценкой и макрофоном.',
     ],
   },
   {
-    pattern: /gazp|gazprom|газпром|ga/i,
+    pattern: /msft|microsoft|микрософт/i,
     replies: [
-      'По Газпрому смотрю на дивидендную доходность и новости по экспортным пошлинам — это главный драйвер.',
-      'GAZP интересен как дивидендная история, но волатильность может быть выше рынка.',
+      'MSFT держит momentum на облаке и AI-интеграции — для долгого горизонта остаётся якорной позицией.',
+      'По Microsoft смотрю на Azure и корпоративный спрос — это главный драйвер на квартал.',
+    ],
+  },
+  {
+    pattern: /bnd|vanguard|облигацион|etf/i,
+    replies: [
+      'BND подходит как защитный блок в USD-портфеле — снижает волатильность относительно акций.',
+      'По облигационным ETF держу умеренную долю: ставки и duration — ключевые риски.',
     ],
   },
   {
@@ -54,14 +67,14 @@ const RESPONSE_RULES: ResponseRule[] = [
   {
     pattern: /дивиденд|купон|доход/i,
     replies: [
-      'Дивидендный блок можно собрать из SBER, LKOH и части облигаций — так ниже просадка.',
-      'Если цель — доход, смотрю связку «голубые фишки + короткие ОФЗ» с ребалансом раз в квартал.',
+      'Дивидендный блок можно собрать из AAPL, MSFT и части BND — так ниже просадка.',
+      'Если цель — доход, смотрю связку «US large cap + bond ETF» с ребалансом раз в квартал.',
     ],
   },
   {
     pattern: /портфел|распредел|доля|ребаланс/i,
     replies: [
-      'Сейчас разумно 55% акции РФ, 25% облигации, 20% валюта — но под ваш риск-профиль подстроим.',
+      'Сейчас разумно 55% US equities, 25% bond ETF, 20% cash — но под ваш риск-профиль подстроим.',
       'Предлагаю не менять всё сразу: 2–3 шага по 10% в неделю, чтобы не ловить плохую цену.',
     ],
   },
@@ -149,11 +162,27 @@ export function generateDemoChatReply(
     return pickNextReply(`${chatId}:support`, SUPPORT_REPLIES);
   }
 
+  if (shouldReplyWithOperationConfirmation(chatId, normalizedMessage)) {
+    const operationReply = getOperationExecutedReply(chatId, pickNextReply);
+
+    if (operationReply) {
+      return operationReply;
+    }
+  }
+
   for (let ruleIndex = 0; ruleIndex < RESPONSE_RULES.length; ruleIndex += 1) {
     const rule = RESPONSE_RULES[ruleIndex];
 
     if (rule.pattern.test(normalizedMessage)) {
       return pickNextReply(`${chatId}:rule:${ruleIndex}`, rule.replies);
+    }
+  }
+
+  if (isClientTraderChat(chatId)) {
+    const operationReply = getOperationExecutedReply(chatId, pickNextReply);
+
+    if (operationReply) {
+      return operationReply;
     }
   }
 

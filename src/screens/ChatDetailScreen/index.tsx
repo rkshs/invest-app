@@ -8,6 +8,8 @@ import { ClientStackParamList } from '../../app/navigation';
 import { ChatDetailHeader } from '../../components/ChatDetailHeader';
 import { ChatMessageBubble } from '../../components/ChatMessageBubble';
 import { ChatMessageInput } from '../../components/ChatMessageInput';
+import { getAccountForClientChat } from '../../entities/client';
+import { ClientChatPortfolioBar } from '../../features/client/ui/ClientChatPortfolioBar';
 import { colors, spacing, typography } from '../../shared/theme';
 import { ChatMessage } from '../../types/chatMessage';
 import { useChatConversation } from '../../features/chat';
@@ -26,6 +28,7 @@ export function ChatDetailScreen() {
   const { chat, messages, sendMessage, isReplyPending } = useChatConversation(
     route.params.chatId,
   );
+  const chatAccount = getAccountForClientChat(route.params.chatId);
 
   const scrollToLatestMessage = () => {
     listRef.current?.scrollToEnd({ animated: true });
@@ -41,10 +44,16 @@ export function ChatDetailScreen() {
 
   return (
     <View style={styles.screen}>
-      <ChatDetailHeader
-        chat={chat}
-        onBackPress={() => navigation.goBack()}
-      />
+      <View style={styles.headerSection}>
+        <ChatDetailHeader
+          chat={chat}
+          onBackPress={() => navigation.goBack()}
+        />
+
+        {chatAccount ? (
+          <ClientChatPortfolioBar cpid={chatAccount.cpid} />
+        ) : null}
+      </View>
 
       <FlatList
         ref={listRef}
@@ -74,6 +83,9 @@ function MessageSeparator() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  headerSection: {
     backgroundColor: colors.background,
   },
   messagesContent: {
