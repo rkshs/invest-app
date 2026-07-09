@@ -26,6 +26,8 @@ export function mapAccountPositionToPortfolioRow(
     isin: position.isin,
     securityType: position.securityType,
     quantity: position.quantity,
+    unitPrice: position.unitPrice,
+    changePercent: position.changePercent,
     portfolioShare: getPositionPortfolioShare(
       convertToUsd(totalValue, position.currencyCode),
       portfolioTotalValue,
@@ -47,6 +49,9 @@ export function mapSecurityToPortfolioRow(
     isin: security.isin,
     securityType: security.securityType,
     quantity: security.quantity,
+    unitPrice:
+      security.quantity > 0 ? security.price / security.quantity : 0,
+    changePercent: security.changePercent,
     portfolioShare: getPositionPortfolioShare(
       convertToUsd(security.price, security.currencyCode),
       portfolioTotalValue,

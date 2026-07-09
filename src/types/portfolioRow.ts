@@ -10,6 +10,8 @@ export type PortfolioRowData = {
   isin: string;
   securityType?: SecurityInstrumentType;
   quantity: number;
+  unitPrice?: number;
+  changePercent?: number;
   portfolioShare: number;
   totalValue: number;
   currencyCode?: string;

@@ -1,4 +1,5 @@
 import { PortfolioCurrency } from './convertPortfolioCurrency';
+import { colors } from '../theme';
 
 const percentFormatter = new Intl.NumberFormat('ru-RU', {
   minimumFractionDigits: 2,
@@ -60,6 +61,18 @@ export function formatPercent(value: number): string {
   return `${sign}${normalizeSpaces(percentFormatter.format(Math.abs(value)))}%`;
 }
 
+export function getPortfolioChangeColor(changePercent: number): string {
+  if (changePercent > 0) {
+    return colors.green;
+  }
+
+  if (changePercent < 0) {
+    return colors.red;
+  }
+
+  return colors.textSecondary;
+}
+
 export function formatAccountDynamics(
   changeFromZero: number,
   changePercentFromZero: number,
@@ -74,6 +87,35 @@ export function formatPositionQuantity(
   currency: PortfolioCurrency = 'USD',
 ): string {
   return `${quantity} шт × ${formatMoney(unitPrice, currency)}`;
+}
+
+export function formatPortfolioShare(portfolioShare: number): string {
+  const share = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(portfolioShare);
+
+  return `Вес ${share}%`;
+}
+
+export function formatUnitClosingPrice(
+  unitPrice: number,
+  currency: string = 'USD',
+): string {
+  const formatted = new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(unitPrice);
+
+  return `${formatted} ${currency}/шт`;
+}
+
+export function formatSecurityPositionMeta(
+  quantity: number,
+  unitPrice: number,
+  currency: string = 'USD',
+): string {
+  return `${quantity} шт · ${formatUnitClosingPrice(unitPrice, currency)}`;
 }
 
 export function formatPortfolioPositionMeta(

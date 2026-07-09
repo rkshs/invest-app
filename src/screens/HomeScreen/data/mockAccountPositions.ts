@@ -42,6 +42,18 @@ const accountPositions: Record<string, AccountPosition[]> = {
       changePercent: 1.5,
       currencyCode: 'USD',
     },
+    {
+      id: '8',
+      name: 'Tesla Inc.',
+      ticker: 'TSLA',
+      isin: 'US88160R1014',
+      securityType: 'stock',
+      quantity: 8,
+      unitPrice: 250,
+      changeAmount: -24,
+      changePercent: -1.2,
+      currencyCode: 'USD',
+    },
   ],
   '2': [
     {
