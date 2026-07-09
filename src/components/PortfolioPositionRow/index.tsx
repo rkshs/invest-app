@@ -2,8 +2,11 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import {
   formatCashPositionMeta,
+  formatPercent,
   formatPortfolioMoney,
-  formatPortfolioPositionMeta,
+  formatPortfolioShare,
+  formatSecurityPositionMeta,
+  getPortfolioChangeColor,
 } from '../../shared/lib/formatFinance';
 import { toPortfolioCurrency } from '../../shared/lib/convertPortfolioCurrency';
 import { getCurrencyAppearance } from '../../shared/lib/getCurrencyAppearance';
@@ -56,9 +59,9 @@ export function PortfolioPositionRow({ item, isLast = false }: PortfolioPosition
               </Text>
             ) : null}
             <Text style={styles.detail}>
-              {formatPortfolioPositionMeta(
+              {formatSecurityPositionMeta(
                 item.quantity,
-                item.portfolioShare,
+                item.unitPrice ?? 0,
                 valueCurrency,
               )}
             </Text>
@@ -66,9 +69,26 @@ export function PortfolioPositionRow({ item, isLast = false }: PortfolioPosition
         )}
       </View>
 
-      <Text style={styles.value}>
-        {formatPortfolioMoney(item.totalValue, valueCurrency)}
-      </Text>
+      <View style={styles.valueColumn}>
+        <Text style={styles.value}>
+          {formatPortfolioMoney(item.totalValue, valueCurrency)}
+        </Text>
+        {!isCash && item.changePercent != null ? (
+          <Text
+            style={[
+              styles.change,
+              { color: getPortfolioChangeColor(item.changePercent) },
+            ]}
+          >
+            {formatPercent(item.changePercent)}
+          </Text>
+        ) : null}
+        {!isCash ? (
+          <Text style={styles.share}>
+            {formatPortfolioShare(item.portfolioShare)}
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -114,12 +134,29 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: colors.textSecondary,
   },
+  valueColumn: {
+    alignItems: 'flex-end',
+    flexShrink: 0,
+    gap: spacing.xs,
+  },
   value: {
     fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.sm + 1,
     lineHeight: typography.fontSize.sm + 7,
     color: colors.text,
     textAlign: 'right',
-    flexShrink: 0,
+  },
+  change: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: 12,
+    lineHeight: 16,
+    textAlign: 'right',
+  },
+  share: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.textSecondary,
+    textAlign: 'right',
   },
 });

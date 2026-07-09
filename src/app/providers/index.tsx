@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { applyDefaultFontFamily } from '../../shared/theme/applyDefaultFontFamily';
 import { AuthProvider } from '../../features/auth/model/AuthContext';
+import { AuthFlowProvider } from '../../features/auth/model/AuthFlowContext';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -33,7 +34,9 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <AuthFlowProvider>{children}</AuthFlowProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

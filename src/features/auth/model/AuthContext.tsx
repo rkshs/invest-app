@@ -1,11 +1,18 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 import { Session, UserRole } from '../../../entities/session/types';
 
+export type AuthTransitionMode = 'enter' | 'exit' | null;
+
 type AuthContextValue = {
   session: Session | null;
+  transitionMode: AuthTransitionMode;
+  revealAuthAfterExit: boolean;
   loginAsClient: () => void;
   loginAsTrader: () => void;
+  finishEnterTransition: () => void;
+  clearSessionAfterExitCover: () => void;
+  finishExitTransition: () => void;
   logout: () => void;
 };
 
@@ -17,15 +24,58 @@ type AuthProviderProps = {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
+  const [transitionMode, setTransitionMode] = useState<AuthTransitionMode>(null);
+  const [revealAuthAfterExit, setRevealAuthAfterExit] = useState(false);
+
+  const finishEnterTransition = useCallback(() => {
+    setTransitionMode(null);
+  }, []);
+
+  const clearSessionAfterExitCover = useCallback(() => {
+    setSession(null);
+    setRevealAuthAfterExit(true);
+  }, []);
+
+  const finishExitTransition = useCallback(() => {
+    setTransitionMode(null);
+    setRevealAuthAfterExit(false);
+  }, []);
+
+  const logout = useCallback(() => {
+    if (!session || transitionMode !== null) {
+      return;
+    }
+
+    setTransitionMode('exit');
+  }, [session, transitionMode]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
-      loginAsClient: () => setSession({ role: 'client' }),
-      loginAsTrader: () => setSession({ role: 'trader' }),
-      logout: () => setSession(null),
+      transitionMode,
+      revealAuthAfterExit,
+      loginAsClient: () => {
+        setSession({ role: 'client' });
+        setTransitionMode('enter');
+      },
+      loginAsTrader: () => {
+        setSession({ role: 'trader' });
+        setTransitionMode('enter');
+      },
+      finishEnterTransition,
+      clearSessionAfterExitCover,
+      finishExitTransition,
+      logout,
     }),
-    [session],
+    [
+      clearSessionAfterExitCover,
+      finishEnterTransition,
+      finishExitTransition,
+      logout,
+      revealAuthAfterExit,
+      session,
+      transitionMode,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

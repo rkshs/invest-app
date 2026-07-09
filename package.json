@@ -12,6 +12,7 @@
     "expo-blur": "~56.0.3",
     "expo-dev-client": "~56.0.20",
     "expo-linear-gradient": "~56.0.4",
+    "expo-local-authentication": "~56.0.4",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
