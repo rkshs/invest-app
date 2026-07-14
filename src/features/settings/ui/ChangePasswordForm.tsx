@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { colors, radius, spacing, typography } from '../../../shared/theme';
+import { sanitizePasswordInput } from '../../../shared/lib/sanitizePasswordInput';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -25,7 +26,7 @@ function PasswordField({ label, value, onChangeText }: PasswordFieldProps) {
       <Text style={styles.label}>{label}</Text>
       <TextInput
         value={value}
-        onChangeText={onChangeText}
+        onChangeText={(text) => onChangeText(sanitizePasswordInput(text))}
         placeholder="Введите пароль"
         placeholderTextColor={colors.textMuted}
         style={[styles.input, Platform.OS === 'web' && webInputStyle]}

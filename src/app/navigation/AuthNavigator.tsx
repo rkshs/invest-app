@@ -9,6 +9,7 @@ import { AuthLoginScreen } from '../../features/auth/ui/screens/AuthLoginScreen'
 import { AuthOtpScreen } from '../../features/auth/ui/screens/AuthOtpScreen';
 import { AuthPinCodeScreen } from '../../features/auth/ui/screens/AuthPinCodeScreen';
 import { AuthRecoveryMethodScreen } from '../../features/auth/ui/screens/AuthRecoveryMethodScreen';
+import { AuthResetPasswordScreen } from '../../features/auth/ui/screens/AuthResetPasswordScreen';
 import { AuthSecondFactorScreen } from '../../features/auth/ui/screens/AuthSecondFactorScreen';
 import { AuthStackParamList } from './types';
 
@@ -55,6 +56,11 @@ function AuthStackNavigator() {
       <Stack.Screen
         name="AuthRecoveryMethod"
         component={AuthRecoveryMethodScreen}
+        options={authScreenOptions}
+      />
+      <Stack.Screen
+        name="AuthResetPassword"
+        component={AuthResetPasswordScreen}
         options={authScreenOptions}
       />
     </Stack.Navigator>

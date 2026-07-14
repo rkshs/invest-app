@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 
 import { authInputWebStyle, isAuthInputWeb } from '../../lib/authInputStyle';
+import { sanitizePasswordInput } from '../../../../shared/lib/sanitizePasswordInput';
 import { colors, radius, spacing, typography } from '../../../../shared/theme';
 
 type AuthTextInputProps = {
@@ -70,13 +71,18 @@ export function AuthTextInput({
     onBlur?.(event);
   };
 
+  const handleChangeText = (text: string) => {
+    const nextValue = secureTextEntry ? sanitizePasswordInput(text) : text;
+    onChangeText?.(nextValue);
+  };
+
   return (
     <View style={styles.field}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <TextInput
         value={value}
-        onChangeText={onChangeText}
+        onChangeText={handleChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textMuted}
         style={[

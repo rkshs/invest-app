@@ -10,6 +10,7 @@ type AuthContextValue = {
   revealAuthAfterExit: boolean;
   loginAsClient: () => void;
   loginAsTrader: () => void;
+  loginWithRole: (role: UserRole) => void;
   finishEnterTransition: () => void;
   clearSessionAfterExitCover: () => void;
   finishExitTransition: () => void;
@@ -41,6 +42,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setRevealAuthAfterExit(false);
   }, []);
 
+  const beginLogin = useCallback((role: UserRole) => {
+    setSession({ role });
+    setTransitionMode('enter');
+  }, []);
+
+  const loginWithRole = useCallback(
+    (role: UserRole) => {
+      beginLogin(role);
+    },
+    [beginLogin],
+  );
+
   const logout = useCallback(() => {
     if (!session || transitionMode !== null) {
       return;
@@ -54,23 +67,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       session,
       transitionMode,
       revealAuthAfterExit,
-      loginAsClient: () => {
-        setSession({ role: 'client' });
-        setTransitionMode('enter');
-      },
-      loginAsTrader: () => {
-        setSession({ role: 'trader' });
-        setTransitionMode('enter');
-      },
+      loginAsClient: () => beginLogin('client'),
+      loginAsTrader: () => beginLogin('trader'),
+      loginWithRole,
       finishEnterTransition,
       clearSessionAfterExitCover,
       finishExitTransition,
       logout,
     }),
     [
+      beginLogin,
       clearSessionAfterExitCover,
       finishEnterTransition,
       finishExitTransition,
+      loginWithRole,
       logout,
       revealAuthAfterExit,
       session,

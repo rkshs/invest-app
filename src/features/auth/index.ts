@@ -1,3 +1,4 @@
+export { AUTH_API_MODE } from './config';
 export { AuthFlowProvider, useAuthFlow } from './model/AuthFlowContext';
 export type { AuthIdentifier, AuthIdentifierType } from './model/AuthFlowContext';
 export { useResendTimer } from './model/useResendTimer';
@@ -29,4 +30,5 @@ export { AuthLoginScreen } from './ui/screens/AuthLoginScreen';
 export { AuthOtpScreen } from './ui/screens/AuthOtpScreen';
 export { AuthPinCodeScreen } from './ui/screens/AuthPinCodeScreen';
 export { AuthRecoveryMethodScreen } from './ui/screens/AuthRecoveryMethodScreen';
+export { AuthResetPasswordScreen } from './ui/screens/AuthResetPasswordScreen';
 export { AuthSecondFactorScreen } from './ui/screens/AuthSecondFactorScreen';
