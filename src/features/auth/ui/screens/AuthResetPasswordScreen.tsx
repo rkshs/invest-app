@@ -12,7 +12,7 @@ import {
   passwordsMatch,
 } from '../../lib/validatePassword';
 import { useAuthFlow } from '../../model/AuthFlowContext';
-import { useSetPasswordMutation } from '../../model/useAuthMutations';
+import { useResetPasswordMutation } from '../../model/useAuthMutations';
 import { AuthPasswordRequirements } from '../components/AuthPasswordRequirements';
 import { AuthPasswordStrength } from '../components/AuthPasswordStrength';
 import { AuthPrimaryButton } from '../components/AuthPrimaryButton';
@@ -20,15 +20,15 @@ import { AuthTextInput } from '../components/AuthTextInput';
 import { AuthScreenLayout } from '../layout/AuthScreenLayout';
 import { colors, spacing, typography } from '../../../../shared/theme';
 
-type AuthCreatePasswordNavigationProp = NativeStackNavigationProp<
+type AuthResetPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
-  'AuthCreatePassword'
+  'AuthResetPassword'
 >;
 
-export function AuthCreatePasswordScreen() {
-  const navigation = useNavigation<AuthCreatePasswordNavigationProp>();
-  const { setPasswordDraft, verificationToken } = useAuthFlow();
-  const setPasswordMutation = useSetPasswordMutation();
+export function AuthResetPasswordScreen() {
+  const navigation = useNavigation<AuthResetPasswordNavigationProp>();
+  const { setPasswordDraft, verificationToken, clearAuthSession } = useAuthFlow();
+  const resetPasswordMutation = useResetPasswordMutation();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -60,17 +60,21 @@ export function AuthCreatePasswordScreen() {
     }
 
     if (!verificationToken) {
-      setError('Сессия подтверждения не найдена');
+      setError('Сессия восстановления не найдена');
       return;
     }
 
     try {
-      await setPasswordMutation.mutateAsync({
+      await resetPasswordMutation.mutateAsync({
         verificationToken,
         password,
       });
       setPasswordDraft(password);
-      navigation.navigate('AuthPinCode');
+      clearAuthSession();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'AuthLogin' }],
+      });
     } catch (mutationError) {
       setError(getAuthErrorMessage(mutationError, 'Не удалось сохранить пароль'));
     }
@@ -78,15 +82,15 @@ export function AuthCreatePasswordScreen() {
 
   return (
     <AuthScreenLayout
-      title="Создание пароля"
-      subtitle="Придумайте надёжный пароль"
+      title="Новый пароль"
+      subtitle="Придумайте новый пароль для входа"
       showLogo={false}
       backLinkLabel="Назад"
       onBackLinkPress={() => navigation.goBack()}
     >
       <View style={styles.form}>
         <AuthTextInput
-          label="Пароль"
+          label="Новый пароль"
           value={password}
           onChangeText={(value) => {
             setSubmitted(false);
@@ -125,7 +129,7 @@ export function AuthCreatePasswordScreen() {
           label="Сохранить пароль"
           onPress={handleSave}
           disabled={!canSave}
-          loading={setPasswordMutation.isPending}
+          loading={resetPasswordMutation.isPending}
         />
       </View>
     </AuthScreenLayout>

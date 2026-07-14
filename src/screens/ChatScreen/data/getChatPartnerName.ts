@@ -6,7 +6,7 @@ function isClientTraderChatId(chatId: string): boolean {
 
 export function getChatPartnerName(chat: Chat): string {
   if (isClientTraderChatId(chat.id)) {
-    return 'Александр';
+    return 'Execution';
   }
 
   if (chat.id === 'chat-4') {

@@ -12,10 +12,14 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
 import { isPinComplete, PIN_LENGTH, sanitizePinInput } from '../../lib/pin';
-import { verifyLoginPin } from '../../lib/verifyLogin';
-import { useAuth } from '../../model/AuthContext';
+import { useCompleteAuthLogin } from '../../model/useCompleteAuthLogin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
+import {
+  useQuickPinLoginMutation,
+  useVerifyLoginPinMutation,
+} from '../../model/useAuthMutations';
 import { AuthNumericKeypad } from '../components/AuthNumericKeypad';
 import { AuthPinInput } from '../components/AuthPinInput';
 import { AuthPrimaryButton } from '../components/AuthPrimaryButton';
@@ -32,13 +36,17 @@ const isWeb = Platform.OS === 'web';
 export function AuthLoginPinScreen() {
   const navigation = useNavigation<AuthLoginPinNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { loginAsClient } = useAuth();
-  const { pinDraft } = useAuthFlow();
+  const completeAuthLogin = useCompleteAuthLogin();
+  const { identifier, loginToken } = useAuthFlow();
+  const verifyLoginPinMutation = useVerifyLoginPinMutation();
+  const quickPinLoginMutation = useQuickPinLoginMutation();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canLogin = isPinComplete(pin);
+  const isSecondFactorFlow = Boolean(loginToken);
+  const isSubmitting =
+    verifyLoginPinMutation.isPending || quickPinLoginMutation.isPending;
 
   const handlePinChange = (value: string) => {
     setError('');
@@ -60,20 +68,32 @@ export function AuthLoginPinScreen() {
   };
 
   const handleLogin = async () => {
-    if (!verifyLoginPin(pin, pinDraft)) {
-      setError('Неверный пин-код');
+    setError('');
+
+    try {
+      if (isSecondFactorFlow && loginToken) {
+        const response = await verifyLoginPinMutation.mutateAsync({
+          loginToken,
+          pin,
+        });
+        completeAuthLogin(response);
+        return;
+      }
+
+      if (!identifier) {
+        setError('Идентификатор не найден');
+        return;
+      }
+
+      const response = await quickPinLoginMutation.mutateAsync({
+        identifierValue: identifier.value,
+        pin,
+      });
+      completeAuthLogin(response);
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Неверный пин-код'));
       setPin('');
-      return;
     }
-
-    setIsSubmitting(true);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 300);
-    });
-
-    setIsSubmitting(false);
-    loginAsClient();
   };
 
   return (

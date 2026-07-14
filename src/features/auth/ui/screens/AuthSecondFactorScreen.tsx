@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
 import { authenticateWithBiometric, getBiometricAvailability } from '../../lib/biometricAuth';
 import { formatIdentifierForBadge } from '../../lib/otp';
-import { useAuth } from '../../model/AuthContext';
+import { useCompleteAuthLogin } from '../../model/useCompleteAuthLogin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
+import {
+  useVerifyLoginBiometricMutation,
+} from '../../model/useAuthMutations';
 import { AuthMethodOptionCard } from '../components/AuthMethodOptionCard';
 import { AuthScreenLayout } from '../layout/AuthScreenLayout';
 import { colors, spacing, typography } from '../../../../shared/theme';
@@ -19,8 +23,9 @@ type AuthSecondFactorNavigationProp = NativeStackNavigationProp<
 
 export function AuthSecondFactorScreen() {
   const navigation = useNavigation<AuthSecondFactorNavigationProp>();
-  const { loginAsClient } = useAuth();
-  const { identifier, pinDraft, biometricEnabled } = useAuthFlow();
+  const completeAuthLogin = useCompleteAuthLogin();
+  const { identifier, pinDraft, biometricEnabled, loginToken } = useAuthFlow();
+  const verifyLoginBiometricMutation = useVerifyLoginBiometricMutation();
   const [biometricLabel, setBiometricLabel] = useState('Face ID / Touch ID');
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
   const [error, setError] = useState('');
@@ -69,7 +74,7 @@ export function AuthSecondFactorScreen() {
   };
 
   const handleBiometricPress = async () => {
-    if (!biometricEnabled) {
+    if (!biometricEnabled || !loginToken) {
       return;
     }
 
@@ -78,14 +83,20 @@ export function AuthSecondFactorScreen() {
 
     const success = await authenticateWithBiometric('Подтвердите вход');
 
-    setIsBiometricLoading(false);
-
     if (!success) {
+      setIsBiometricLoading(false);
       setError('Не удалось подтвердить вход по биометрии');
       return;
     }
 
-    loginAsClient();
+    try {
+      const response = await verifyLoginBiometricMutation.mutateAsync(loginToken);
+      completeAuthLogin(response);
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось подтвердить вход по биометрии'));
+    } finally {
+      setIsBiometricLoading(false);
+    }
   };
 
   return (
@@ -115,8 +126,8 @@ export function AuthSecondFactorScreen() {
           title="Биометрия"
           subtitle={biometricLabel}
           onPress={handleBiometricPress}
-          disabled={!biometricEnabled}
-          loading={isBiometricLoading}
+          disabled={!biometricEnabled || !loginToken}
+          loading={isBiometricLoading || verifyLoginBiometricMutation.isPending}
         />
       </View>
 

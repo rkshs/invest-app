@@ -15,14 +15,21 @@ type AuthFlowContextValue = {
   pinDraft: string | null;
   biometricEnabled: boolean;
   hasCompletedOnboarding: boolean;
+  authSessionId: string | null;
+  verificationToken: string | null;
+  loginToken: string | null;
   setIdentifier: (identifier: AuthIdentifier) => void;
   setPasswordDraft: (password: string) => void;
   setPinDraft: (pin: string | null) => void;
   setBiometricEnabled: (enabled: boolean) => void;
+  setAuthSessionId: (sessionId: string | null) => void;
+  setVerificationToken: (token: string | null) => void;
+  setLoginToken: (token: string | null) => void;
   completeOnboarding: () => void;
   clearIdentifier: () => void;
   clearPasswordDraft: () => void;
   clearPinDraft: () => void;
+  clearAuthSession: () => void;
 };
 
 const AuthFlowContext = createContext<AuthFlowContextValue | null>(null);
@@ -37,6 +44,9 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
   const [pinDraft, setPinDraftState] = useState<string | null>(null);
   const [biometricEnabled, setBiometricEnabledState] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [authSessionId, setAuthSessionIdState] = useState<string | null>(null);
+  const [verificationToken, setVerificationTokenState] = useState<string | null>(null);
+  const [loginToken, setLoginTokenState] = useState<string | null>(null);
 
   const setIdentifier = useCallback((nextIdentifier: AuthIdentifier) => {
     setIdentifierState(nextIdentifier);
@@ -52,6 +62,24 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
 
   const setBiometricEnabled = useCallback((enabled: boolean) => {
     setBiometricEnabledState(enabled);
+  }, []);
+
+  const setAuthSessionId = useCallback((sessionId: string | null) => {
+    setAuthSessionIdState(sessionId);
+  }, []);
+
+  const setVerificationToken = useCallback((token: string | null) => {
+    setVerificationTokenState(token);
+  }, []);
+
+  const setLoginToken = useCallback((token: string | null) => {
+    setLoginTokenState(token);
+  }, []);
+
+  const clearAuthSession = useCallback(() => {
+    setAuthSessionIdState(null);
+    setVerificationTokenState(null);
+    setLoginTokenState(null);
   }, []);
 
   const completeOnboarding = useCallback(() => {
@@ -77,29 +105,43 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
       pinDraft,
       biometricEnabled,
       hasCompletedOnboarding,
+      authSessionId,
+      verificationToken,
+      loginToken,
       setIdentifier,
       setPasswordDraft,
       setPinDraft,
       setBiometricEnabled,
+      setAuthSessionId,
+      setVerificationToken,
+      setLoginToken,
       completeOnboarding,
       clearIdentifier,
       clearPasswordDraft,
       clearPinDraft,
+      clearAuthSession,
     }),
     [
+      authSessionId,
       biometricEnabled,
+      clearAuthSession,
       clearIdentifier,
       clearPasswordDraft,
       clearPinDraft,
       completeOnboarding,
       hasCompletedOnboarding,
       identifier,
+      loginToken,
       passwordDraft,
       pinDraft,
+      setAuthSessionId,
       setBiometricEnabled,
       setIdentifier,
+      setLoginToken,
       setPasswordDraft,
       setPinDraft,
+      setVerificationToken,
+      verificationToken,
     ],
   );
 

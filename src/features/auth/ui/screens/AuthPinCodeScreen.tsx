@@ -12,8 +12,10 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
 import { isPinComplete, PIN_LENGTH, sanitizePinInput } from '../../lib/pin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
+import { useRegisterPinMutation } from '../../model/useAuthMutations';
 import { AuthActionRow } from '../components/AuthActionRow';
 import { AuthNumericKeypad } from '../components/AuthNumericKeypad';
 import { AuthPinInput } from '../components/AuthPinInput';
@@ -32,9 +34,10 @@ const isWeb = Platform.OS === 'web';
 export function AuthPinCodeScreen() {
   const navigation = useNavigation<AuthPinCodeNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { setPinDraft } = useAuthFlow();
+  const { setPinDraft, identifier } = useAuthFlow();
+  const registerPinMutation = useRegisterPinMutation();
   const [pin, setPin] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const canContinue = isPinComplete(pin);
 
@@ -57,15 +60,23 @@ export function AuthPinCodeScreen() {
   };
 
   const navigateNext = async (nextPin: string | null) => {
-    setIsSubmitting(true);
-    setPinDraft(nextPin);
+    if (!identifier) {
+      setError('Идентификатор не найден');
+      return;
+    }
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 300);
-    });
+    setError('');
 
-    setIsSubmitting(false);
-    navigation.navigate('AuthBiometric');
+    try {
+      await registerPinMutation.mutateAsync({
+        identifierValue: identifier.value,
+        pin: nextPin,
+      });
+      setPinDraft(nextPin);
+      navigation.navigate('AuthBiometric');
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось сохранить пин-код'));
+    }
   };
 
   const handleSkip = () => {
@@ -104,6 +115,8 @@ export function AuthPinCodeScreen() {
         </View>
 
         <AuthPinInput value={pin} onChange={handlePinChange} />
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       </ScrollView>
 
       <View
@@ -129,7 +142,7 @@ export function AuthPinCodeScreen() {
             <AuthSecondaryButton
               label="Пропустить"
               onPress={handleSkip}
-              disabled={isSubmitting}
+              disabled={registerPinMutation.isPending}
             />
           }
           right={
@@ -137,7 +150,7 @@ export function AuthPinCodeScreen() {
               label="Далее"
               onPress={handleContinue}
               disabled={!canContinue}
-              loading={isSubmitting}
+              loading={registerPinMutation.isPending}
             />
           }
         />
@@ -182,6 +195,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     lineHeight: typography.fontSize.sm + 6,
     color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  error: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.fontSize.sm,
+    color: colors.red,
     textAlign: 'center',
   },
   divider: {

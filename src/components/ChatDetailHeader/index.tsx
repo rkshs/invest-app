@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getTickerAppearance } from '../../shared/lib/getTickerAppearance';
+import { getChatAvatarAppearance } from '../../shared/lib/getChatAvatarAppearance';
 import { colors, radius, spacing, typography } from '../../shared/theme';
 import { Chat } from '../../types/chat';
 
@@ -15,7 +15,7 @@ const AVATAR_SIZE = 36;
 
 export function ChatDetailHeader({ chat, onBackPress }: ChatDetailHeaderProps) {
   const insets = useSafeAreaInsets();
-  const avatar = getTickerAppearance(chat.avatarSeed);
+  const avatar = getChatAvatarAppearance(chat);
 
   return (
     <View

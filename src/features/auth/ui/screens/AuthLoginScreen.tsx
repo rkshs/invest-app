@@ -1,14 +1,22 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
 import { authenticateWithBiometric } from '../../lib/biometricAuth';
-import { formatIdentifierForBadge } from '../../lib/otp';
-import { verifyLoginPassword } from '../../lib/verifyLogin';
-import { useAuth } from '../../model/AuthContext';
+import {
+  formatLoginIdentifierInput,
+  parseLoginIdentifierInput,
+} from '../../lib/loginIdentifier';
+import { getLoginMethodAvailability } from '../../lib/loginMethods';
+import { useCompleteAuthLogin } from '../../model/useCompleteAuthLogin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
+import {
+  useLoginMutation,
+  useQuickBiometricLoginMutation,
+} from '../../model/useAuthMutations';
 import { AuthActionRow } from '../components/AuthActionRow';
 import { AuthPrimaryButton } from '../components/AuthPrimaryButton';
 import { AuthSecondaryButton } from '../components/AuthSecondaryButton';
@@ -22,73 +30,114 @@ type AuthLoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Au
 
 export function AuthLoginScreen() {
   const navigation = useNavigation<AuthLoginNavigationProp>();
-  const { loginAsClient } = useAuth();
-  const { identifier, passwordDraft, pinDraft, biometricEnabled } = useAuthFlow();
+  const completeAuthLogin = useCompleteAuthLogin();
+  const { identifier, pinDraft, biometricEnabled, setIdentifier, setLoginToken } =
+    useAuthFlow();
+  const loginMutation = useLoginMutation();
+  const quickBiometricLoginMutation = useQuickBiometricLoginMutation();
+  const [identifierInput, setIdentifierInput] = useState(() =>
+    formatLoginIdentifierInput(identifier),
+  );
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
 
-  const identifierLabel = useMemo(() => {
-    if (!identifier) {
-      return '';
-    }
-
-    return formatIdentifierForBadge(
-      identifier.type,
-      identifier.value,
-      identifier.phoneNumber,
-      identifier.countryCode,
-    );
+  useEffect(() => {
+    setIdentifierInput(formatLoginIdentifierInput(identifier));
   }, [identifier]);
 
-  const canLogin = password.length > 0 && Boolean(identifier);
+  const parsedIdentifier = useMemo(
+    () => parseLoginIdentifierInput(identifierInput),
+    [identifierInput],
+  );
+
+  const { canUsePin, canUseBiometric } = useMemo(
+    () =>
+      getLoginMethodAvailability(parsedIdentifier?.value ?? null, {
+        pinDraft,
+        biometricEnabled,
+      }),
+    [biometricEnabled, parsedIdentifier?.value, pinDraft],
+  );
+
+  const canLogin = password.length > 0 && Boolean(parsedIdentifier);
+
+  const resolveIdentifierForLogin = () => {
+    const parsed = parseLoginIdentifierInput(identifierInput);
+
+    if (!parsed) {
+      setError('Введите корректный телефон или email');
+      return null;
+    }
+
+    setIdentifier(parsed);
+    return parsed;
+  };
 
   const handleLogin = async () => {
     setError('');
 
-    if (!identifier) {
-      navigation.navigate('AuthIdentifier');
+    const activeIdentifier = resolveIdentifierForLogin();
+
+    if (!activeIdentifier) {
       return;
     }
 
-    if (!verifyLoginPassword(password, passwordDraft)) {
-      setError('Неверный пароль');
-      return;
+    try {
+      const response = await loginMutation.mutateAsync({
+        identifier: activeIdentifier,
+        password,
+      });
+      setLoginToken(response.loginToken);
+      navigation.navigate('AuthSecondFactor');
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось войти'));
     }
-
-    setIsSubmitting(true);
-
-    await new Promise((resolve) => {
-      setTimeout(resolve, 400);
-    });
-
-    setIsSubmitting(false);
-    navigation.navigate('AuthSecondFactor');
   };
 
   const handleBiometricLogin = async () => {
+    const activeIdentifier = resolveIdentifierForLogin();
+
+    if (!activeIdentifier) {
+      return;
+    }
+
     setError('');
     setIsBiometricLoading(true);
 
-    const success = await authenticateWithBiometric();
-
-    setIsBiometricLoading(false);
+    const success = await authenticateWithBiometric('Подтвердите вход');
 
     if (!success) {
+      setIsBiometricLoading(false);
       setError('Не удалось войти по биометрии');
       return;
     }
 
-    loginAsClient();
+    try {
+      const response = await quickBiometricLoginMutation.mutateAsync({
+        identifierValue: activeIdentifier.value,
+      });
+      completeAuthLogin(response);
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось войти по биометрии'));
+    } finally {
+      setIsBiometricLoading(false);
+    }
   };
 
   const handlePinLogin = () => {
-    if (!pinDraft) {
-      setError('Пин-код не настроен');
+    const activeIdentifier = resolveIdentifierForLogin();
+
+    if (!activeIdentifier) {
       return;
     }
 
+    if (!canUsePin) {
+      setError('Пин-код не настроен для этого аккаунта');
+      return;
+    }
+
+    setError('');
     navigation.navigate('AuthLoginPin');
   };
 
@@ -97,10 +146,17 @@ export function AuthLoginScreen() {
       <View style={styles.form}>
         <AuthTextInput
           label="Телефон или email"
-          value={identifierLabel}
-          onChangeText={() => undefined}
-          editable={false}
+          value={identifierInput}
+          onChangeText={(value) => {
+            setError('');
+            setIdentifierInput(value);
+          }}
           placeholder="Телефон или email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          textContentType="username"
+          autoComplete="username"
         />
 
         <AuthTextInput
@@ -120,7 +176,15 @@ export function AuthLoginScreen() {
         <View style={styles.forgotPasswordRow}>
           <AuthTextLink
             label="Забыл пароль?"
-            onPress={() => navigation.navigate('AuthRecoveryMethod')}
+            onPress={() => {
+              const activeIdentifier = resolveIdentifierForLogin();
+
+              if (!activeIdentifier) {
+                return;
+              }
+
+              navigation.navigate('AuthRecoveryMethod');
+            }}
           />
         </View>
 
@@ -128,7 +192,7 @@ export function AuthLoginScreen() {
           label="Войти"
           onPress={handleLogin}
           disabled={!canLogin}
-          loading={isSubmitting}
+          loading={loginMutation.isPending}
         />
 
         <AuthSeparator label="или войти через" />
@@ -138,7 +202,7 @@ export function AuthLoginScreen() {
             <AuthSecondaryButton
               label="Пин-код"
               onPress={handlePinLogin}
-              disabled={!pinDraft}
+              disabled={!canUsePin}
             />
           }
           right={
@@ -146,8 +210,8 @@ export function AuthLoginScreen() {
               label="Биометрия"
               iconName="finger-print"
               onPress={handleBiometricLogin}
-              disabled={!biometricEnabled}
-              loading={isBiometricLoading}
+              disabled={!canUseBiometric}
+              loading={isBiometricLoading || quickBiometricLoginMutation.isPending}
             />
           }
         />

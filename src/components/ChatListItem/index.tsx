@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { getTickerAppearance } from '../../shared/lib/getTickerAppearance';
+import { getChatAvatarAppearance } from '../../shared/lib/getChatAvatarAppearance';
 import { colors, radius, spacing, typography } from '../../shared/theme';
 import { Chat } from '../../types/chat';
 
@@ -21,7 +21,7 @@ function formatPreview(chat: Chat): string {
 }
 
 export function ChatListItem({ chat, title, onPress }: ChatListItemProps) {
-  const avatar = getTickerAppearance(chat.avatarSeed);
+  const avatar = getChatAvatarAppearance(chat);
   const preview = formatPreview(chat);
   const displayTitle = title ?? chat.title;
 

@@ -12,10 +12,17 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
 import { formatIdentifierForBadge, isOtpComplete, OTP_LENGTH } from '../../lib/otp';
-import { useAuth } from '../../model/AuthContext';
+import { useCompleteAuthLogin } from '../../model/useCompleteAuthLogin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
 import { useResendTimer } from '../../model/useResendTimer';
+import {
+  useResendOtpMutation,
+  useVerifyLoginOtpMutation,
+  useVerifyRecoveryOtpMutation,
+  useVerifyRegistrationOtpMutation,
+} from '../../model/useAuthMutations';
 import { AuthIdentifierBadge } from '../components/AuthIdentifierBadge';
 import { AuthNumericKeypad } from '../components/AuthNumericKeypad';
 import { AuthOtpInput } from '../components/AuthOtpInput';
@@ -33,20 +40,40 @@ export function AuthOtpScreen() {
   const route = useRoute<AuthOtpRouteProp>();
   const navigation = useNavigation<AuthOtpNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { loginAsClient } = useAuth();
-  const { identifier } = useAuthFlow();
+  const completeAuthLogin = useCompleteAuthLogin();
+  const {
+    identifier,
+    authSessionId,
+    loginToken,
+    setVerificationToken,
+  } = useAuthFlow();
+  const verifyRegistrationOtpMutation = useVerifyRegistrationOtpMutation();
+  const verifyRecoveryOtpMutation = useVerifyRecoveryOtpMutation();
+  const verifyLoginOtpMutation = useVerifyLoginOtpMutation();
+  const resendOtpMutation = useResendOtpMutation();
   const { secondsLeft, canResend, restart } = useResendTimer(42);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const purpose = route.params.purpose ?? 'registration';
   const isLoginFlow = purpose === 'login';
+  const isRecoveryFlow = purpose === 'recovery';
 
   const identifierType = identifier?.type ?? route.params.identifierType;
   const identifierValue = identifier?.value ?? route.params.identifierValue;
 
+  const isSubmitting =
+    verifyRegistrationOtpMutation.isPending ||
+    verifyRecoveryOtpMutation.isPending ||
+    verifyLoginOtpMutation.isPending;
+
   const subtitle = useMemo(() => {
+    if (isRecoveryFlow) {
+      return identifierType === 'phone'
+        ? 'Введите код из SMS для восстановления'
+        : 'Введите код из email для восстановления';
+    }
+
     if (isLoginFlow) {
       return identifierType === 'phone'
         ? 'Введите код из SMS для входа'
@@ -56,7 +83,7 @@ export function AuthOtpScreen() {
     return identifierType === 'phone'
       ? 'Введите код из SMS'
       : 'Введите код из email';
-  }, [identifierType, isLoginFlow]);
+  }, [identifierType, isLoginFlow, isRecoveryFlow]);
 
   const badgeLabel = useMemo(
     () =>
@@ -112,30 +139,73 @@ export function AuthOtpScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    setError('');
 
-    await new Promise((resolve) => {
-      setTimeout(resolve, 400);
-    });
+    try {
+      if (isLoginFlow) {
+        if (!loginToken) {
+          throw new Error('Сессия входа не найдена');
+        }
 
-    setIsSubmitting(false);
+        const response = await verifyLoginOtpMutation.mutateAsync({
+          loginToken,
+          code,
+        });
+        completeAuthLogin(response);
+        return;
+      }
 
+      if (!authSessionId) {
+        throw new Error('Сессия подтверждения не найдена');
+      }
+
+      if (isRecoveryFlow) {
+        const response = await verifyRecoveryOtpMutation.mutateAsync({
+          sessionId: authSessionId,
+          code,
+        });
+        setVerificationToken(response.verificationToken);
+        navigation.navigate('AuthResetPassword');
+        return;
+      }
+
+      const response = await verifyRegistrationOtpMutation.mutateAsync({
+        sessionId: authSessionId,
+        code,
+      });
+      setVerificationToken(response.verificationToken);
+      navigation.navigate('AuthCreatePassword');
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось подтвердить код'));
+    }
+  };
+
+  const handleResendPress = async () => {
     if (isLoginFlow) {
-      loginAsClient();
+      restart();
+      setCode('');
+      setError('');
       return;
     }
 
-    navigation.navigate('AuthCreatePassword');
-  };
+    if (!authSessionId) {
+      setError('Сессия подтверждения не найдена');
+      return;
+    }
 
-  const handleResendPress = () => {
-    restart();
-    setCode('');
     setError('');
+
+    try {
+      await resendOtpMutation.mutateAsync(authSessionId);
+      restart();
+      setCode('');
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось отправить код повторно'));
+    }
   };
 
   const handleAlternateChannelPress = () => {
-    if (isLoginFlow) {
+    if (isLoginFlow || isRecoveryFlow) {
       navigation.goBack();
       return;
     }
@@ -162,7 +232,11 @@ export function AuthOtpScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.title}>
-            {isLoginFlow ? 'Подтверждение входа' : 'Подтверждение'}
+            {isRecoveryFlow
+              ? 'Восстановление пароля'
+              : isLoginFlow
+                ? 'Подтверждение входа'
+                : 'Подтверждение'}
           </Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
@@ -192,10 +266,10 @@ export function AuthOtpScreen() {
           label="Подтвердить"
           onPress={handleConfirm}
           disabled={!canConfirm}
-          loading={isSubmitting}
+          loading={isSubmitting || resendOtpMutation.isPending}
         />
 
-        {!isLoginFlow ? (
+        {!isLoginFlow && !isRecoveryFlow ? (
           <AuthTextLink
             label={alternateChannelLabel}
             onPress={handleAlternateChannelPress}

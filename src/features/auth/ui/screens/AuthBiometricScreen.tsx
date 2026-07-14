@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AuthStackParamList } from '../../../../app/navigation';
+import { getAuthErrorMessage } from '../../api/errors';
+import { resolveDemoRole } from '../../api/demo/demoAccounts';
 import {
   authenticateWithBiometric,
   getBiometricAvailability,
 } from '../../lib/biometricAuth';
 import { useAuth } from '../../model/AuthContext';
 import { useAuthFlow } from '../../model/AuthFlowContext';
+import { useEnableBiometricMutation } from '../../model/useAuthMutations';
 import { AuthBiometricIllustration } from '../components/AuthBiometricIllustration';
 import { AuthPrimaryButton } from '../components/AuthPrimaryButton';
 import { AuthSecondaryButton } from '../components/AuthSecondaryButton';
@@ -23,8 +26,9 @@ type AuthBiometricNavigationProp = NativeStackNavigationProp<
 
 export function AuthBiometricScreen() {
   const navigation = useNavigation<AuthBiometricNavigationProp>();
-  const { loginAsClient } = useAuth();
-  const { setBiometricEnabled, completeOnboarding } = useAuthFlow();
+  const { loginWithRole } = useAuth();
+  const { setBiometricEnabled, completeOnboarding, identifier } = useAuthFlow();
+  const enableBiometricMutation = useEnableBiometricMutation();
   const [biometricLabel, setBiometricLabel] = useState('Face ID / Touch ID');
   const [isAvailable, setIsAvailable] = useState(true);
   const [isEnabling, setIsEnabling] = useState(false);
@@ -37,10 +41,23 @@ export function AuthBiometricScreen() {
     });
   }, []);
 
-  const finishOnboarding = (enabled: boolean) => {
-    setBiometricEnabled(enabled);
-    completeOnboarding();
-    loginAsClient();
+  const finishOnboarding = async (enabled: boolean) => {
+    if (!identifier) {
+      setError('Идентификатор не найден');
+      return;
+    }
+
+    try {
+      await enableBiometricMutation.mutateAsync({
+        identifierValue: identifier.value,
+        enabled,
+      });
+      setBiometricEnabled(enabled);
+      completeOnboarding();
+      loginWithRole(resolveDemoRole(identifier.value));
+    } catch (mutationError) {
+      setError(getAuthErrorMessage(mutationError, 'Не удалось завершить настройку'));
+    }
   };
 
   const handleEnable = async () => {
@@ -56,11 +73,11 @@ export function AuthBiometricScreen() {
       return;
     }
 
-    finishOnboarding(true);
+    void finishOnboarding(true);
   };
 
   const handleSkip = () => {
-    finishOnboarding(false);
+    void finishOnboarding(false);
   };
 
   return (
@@ -75,13 +92,13 @@ export function AuthBiometricScreen() {
           <AuthPrimaryButton
             label="Включить биометрию"
             onPress={handleEnable}
-            loading={isEnabling}
+            loading={isEnabling || enableBiometricMutation.isPending}
             disabled={!isAvailable}
           />
           <AuthSecondaryButton
             label="Пропустить"
             onPress={handleSkip}
-            disabled={isEnabling}
+            disabled={isEnabling || enableBiometricMutation.isPending}
           />
         </View>
       }

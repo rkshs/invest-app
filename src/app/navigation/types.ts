@@ -1,3 +1,5 @@
+import type { AuthOtpPurpose } from '../../features/auth/lib/authOtpPurpose';
+
 export type AuthStackParamList = {
   AuthIdentifier: undefined;
   AuthLogin: undefined;
@@ -5,13 +7,14 @@ export type AuthStackParamList = {
   AuthOtp: {
     identifierType: 'phone' | 'email';
     identifierValue: string;
-    purpose?: 'registration' | 'login';
+    purpose?: AuthOtpPurpose;
   };
   AuthCreatePassword: undefined;
   AuthPinCode: undefined;
   AuthBiometric: undefined;
   AuthLoginPin: undefined;
   AuthRecoveryMethod: undefined;
+  AuthResetPassword: undefined;
 };
 
 export type ClientStackParamList = {
