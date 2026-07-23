@@ -1,5 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
+import { clearSecureLoginToken, saveSecureLoginToken } from '../lib/secureLoginToken';
+
 export type AuthIdentifierType = 'phone' | 'email';
 
 export type AuthIdentifier = {
@@ -30,6 +32,7 @@ type AuthFlowContextValue = {
   clearPasswordDraft: () => void;
   clearPinDraft: () => void;
   clearAuthSession: () => void;
+  resetBiometricAfterInvalidation: () => void;
 };
 
 const AuthFlowContext = createContext<AuthFlowContextValue | null>(null);
@@ -74,12 +77,28 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
 
   const setLoginToken = useCallback((token: string | null) => {
     setLoginTokenState(token);
+
+    // Токен, используемый для входа/подтверждения по биометрии, синхронно
+    // зеркалируется в SecureStore (requireAuthentication: true). В demo/web
+    // это no-op — см. src/features/auth/lib/secureLoginToken.ts.
+    if (token) {
+      void saveSecureLoginToken(token);
+    } else {
+      void clearSecureLoginToken();
+    }
   }, []);
 
   const clearAuthSession = useCallback(() => {
     setAuthSessionIdState(null);
     setVerificationTokenState(null);
     setLoginTokenState(null);
+    void clearSecureLoginToken();
+  }, []);
+
+  const resetBiometricAfterInvalidation = useCallback(() => {
+    setBiometricEnabledState(false);
+    setLoginTokenState(null);
+    void clearSecureLoginToken();
   }, []);
 
   const completeOnboarding = useCallback(() => {
@@ -120,6 +139,7 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
       clearPasswordDraft,
       clearPinDraft,
       clearAuthSession,
+      resetBiometricAfterInvalidation,
     }),
     [
       authSessionId,
@@ -134,6 +154,7 @@ export function AuthFlowProvider({ children }: AuthFlowProviderProps) {
       loginToken,
       passwordDraft,
       pinDraft,
+      resetBiometricAfterInvalidation,
       setAuthSessionId,
       setBiometricEnabled,
       setIdentifier,

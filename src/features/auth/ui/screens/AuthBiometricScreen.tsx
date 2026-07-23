@@ -7,7 +7,13 @@ import { AuthStackParamList } from '../../../../app/navigation';
 import { getAuthErrorMessage } from '../../api/errors';
 import { resolveDemoRole } from '../../api/demo/demoAccounts';
 import {
+  BiometricErrorAction,
+  openBiometricSettings,
+  resolveBiometricErrorAction,
+} from '../../lib/biometricErrorPresenter';
+import {
   authenticateWithBiometric,
+  ENABLE_BIOMETRIC_OPTIONS,
   getBiometricAvailability,
 } from '../../lib/biometricAuth';
 import { useAuth } from '../../model/AuthContext';
@@ -16,6 +22,7 @@ import { useEnableBiometricMutation } from '../../model/useAuthMutations';
 import { AuthBiometricIllustration } from '../components/AuthBiometricIllustration';
 import { AuthPrimaryButton } from '../components/AuthPrimaryButton';
 import { AuthSecondaryButton } from '../components/AuthSecondaryButton';
+import { AuthTextLink } from '../components/AuthTextLink';
 import { AuthScreenLayout } from '../layout/AuthScreenLayout';
 import { colors, spacing, typography } from '../../../../shared/theme';
 
@@ -33,6 +40,7 @@ export function AuthBiometricScreen() {
   const [isAvailable, setIsAvailable] = useState(true);
   const [isEnabling, setIsEnabling] = useState(false);
   const [error, setError] = useState('');
+  const [errorAction, setErrorAction] = useState<BiometricErrorAction | null>(null);
 
   useEffect(() => {
     void getBiometricAvailability().then((availability) => {
@@ -62,14 +70,21 @@ export function AuthBiometricScreen() {
 
   const handleEnable = async () => {
     setError('');
+    setErrorAction(null);
     setIsEnabling(true);
 
-    const success = await authenticateWithBiometric();
+    const result = await authenticateWithBiometric(ENABLE_BIOMETRIC_OPTIONS);
 
     setIsEnabling(false);
 
-    if (!success) {
-      setError('Не удалось включить биометрию. Попробуйте ещё раз или пропустите шаг.');
+    if (!result.success) {
+      const action = resolveBiometricErrorAction(result.error);
+
+      if (action.kind !== 'silent') {
+        setError(action.message);
+        setErrorAction(action);
+      }
+
       return;
     }
 
@@ -114,6 +129,9 @@ export function AuthBiometricScreen() {
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
+        {errorAction?.kind === 'open_settings' ? (
+          <AuthTextLink label="Открыть настройки" onPress={openBiometricSettings} />
+        ) : null}
         {!isAvailable ? (
           <Text style={styles.hint}>
             На этом устройстве биометрия недоступна — можно пропустить шаг.

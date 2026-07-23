@@ -5,12 +5,15 @@ import { StyleSheet, View } from 'react-native';
 
 import { AuthStackParamList } from '../../../../app/navigation';
 import { getAuthErrorMessage } from '../../api/errors';
-import { authenticateWithBiometric } from '../../lib/biometricAuth';
+import { AUTH_API_MODE } from '../../config';
+import { authenticateWithBiometric, LOGIN_BIOMETRIC_OPTIONS } from '../../lib/biometricAuth';
+import { openBiometricSettings, resolveBiometricErrorAction } from '../../lib/biometricErrorPresenter';
 import {
   formatLoginIdentifierInput,
   parseLoginIdentifierInput,
 } from '../../lib/loginIdentifier';
 import { getLoginMethodAvailability } from '../../lib/loginMethods';
+import { getSecureLoginToken } from '../../lib/secureLoginToken';
 import { useCompleteAuthLogin } from '../../model/useCompleteAuthLogin';
 import { useAuthFlow } from '../../model/AuthFlowContext';
 import {
@@ -31,8 +34,14 @@ type AuthLoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Au
 export function AuthLoginScreen() {
   const navigation = useNavigation<AuthLoginNavigationProp>();
   const completeAuthLogin = useCompleteAuthLogin();
-  const { identifier, pinDraft, biometricEnabled, setIdentifier, setLoginToken } =
-    useAuthFlow();
+  const {
+    identifier,
+    pinDraft,
+    biometricEnabled,
+    setIdentifier,
+    setLoginToken,
+    resetBiometricAfterInvalidation,
+  } = useAuthFlow();
   const loginMutation = useLoginMutation();
   const quickBiometricLoginMutation = useQuickBiometricLoginMutation();
   const [identifierInput, setIdentifierInput] = useState(() =>
@@ -41,6 +50,7 @@ export function AuthLoginScreen() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isBiometricLoading, setIsBiometricLoading] = useState(false);
+  const [showBiometricSettingsLink, setShowBiometricSettingsLink] = useState(false);
 
   useEffect(() => {
     setIdentifierInput(formatLoginIdentifierInput(identifier));
@@ -103,14 +113,56 @@ export function AuthLoginScreen() {
     }
 
     setError('');
+    setShowBiometricSettingsLink(false);
     setIsBiometricLoading(true);
 
-    const success = await authenticateWithBiometric('Подтвердите вход');
+    if (AUTH_API_MODE === 'demo') {
+      const result = await authenticateWithBiometric(LOGIN_BIOMETRIC_OPTIONS);
 
-    if (!success) {
-      setIsBiometricLoading(false);
-      setError('Не удалось войти по биометрии');
-      return;
+      if (!result.success) {
+        setIsBiometricLoading(false);
+        const action = resolveBiometricErrorAction(result.error);
+
+        if (action.kind !== 'silent') {
+          setError(action.message);
+          setShowBiometricSettingsLink(action.kind === 'open_settings');
+        }
+
+        return;
+      }
+    } else {
+      // Prod-режим: сам факт получения токена из SecureStore (requireAuthentication)
+      // и есть биометрическая проверка на уровне ОС — отдельный вызов
+      // authenticateWithBiometric здесь не нужен (не показываем диалог дважды).
+      const secureResult = await getSecureLoginToken();
+
+      if (secureResult.status === 'invalidated') {
+        resetBiometricAfterInvalidation();
+        setIsBiometricLoading(false);
+        setError('Биометрия на устройстве изменилась. Войдите с паролем.');
+        return;
+      }
+
+      if (secureResult.status === 'not_configured') {
+        setIsBiometricLoading(false);
+        setError('Биометрия ещё не настроена для этого устройства.');
+        return;
+      }
+
+      if (secureResult.status === 'error') {
+        setIsBiometricLoading(false);
+        const action = resolveBiometricErrorAction(secureResult.error);
+
+        if (action.kind !== 'silent') {
+          setError(action.message);
+          setShowBiometricSettingsLink(action.kind === 'open_settings');
+        }
+
+        return;
+      }
+
+      // TODO: когда apiAuthService будет реализован — передавать
+      // secureResult.token на сервер вместе с identifierValue для валидации.
     }
 
     try {
@@ -215,6 +267,10 @@ export function AuthLoginScreen() {
             />
           }
         />
+
+        {showBiometricSettingsLink ? (
+          <AuthTextLink label="Открыть настройки" onPress={openBiometricSettings} />
+        ) : null}
       </View>
     </AuthScreenLayout>
   );

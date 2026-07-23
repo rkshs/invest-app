@@ -6,6 +6,21 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Face ID используется для быстрого и безопасного входа в приложение без ввода пароля."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Face ID используется для быстрого и безопасного входа в приложение без ввода пароля.",
+          "configureAndroidBackup": true
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },

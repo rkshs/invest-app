@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 import { Session, UserRole } from '../../../entities/session/types';
+import { clearSecureLoginToken } from '../lib/secureLoginToken';
 
 export type AuthTransitionMode = 'enter' | 'exit' | null;
 
@@ -59,6 +60,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
+    // Токен для входа по биометрии не должен переживать logout (docs/SECURITY.md,
+    // MASVS-AUTH). В demo/web — no-op.
+    void clearSecureLoginToken();
     setTransitionMode('exit');
   }, [session, transitionMode]);
 
